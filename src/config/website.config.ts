@@ -3,6 +3,8 @@ export class WebsiteConfig {
     partials: string[];
     pages: string[];
     defaults: WebpageDefaults;
+    scripts?: string[];
+    styles?: string[];
 }
 
 export interface WebpageDefaults {

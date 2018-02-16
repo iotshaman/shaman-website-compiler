@@ -1,5 +1,7 @@
 import { TemplateEngineConfig } from './template-engine.config';
 import { GetMetaTagsTemplate } from './defaults/meta-tags';
+import { GetStylesTemplate } from './defaults/styles';
+import { GetScriptsTemplate } from './defaults/scripts';
 import * as nodePath from 'path';
 import * as Promise from 'promise';
 
@@ -17,6 +19,8 @@ export function HtmlTemplateEngine(config: TemplateEngineConfig): Promise<any> {
 export function generatePartials(config: TemplateEngineConfig) {
     return generatePartialsFromFiles(config).then(() => {
         config.handlebars.registerPartial('$.tags',GetMetaTagsTemplate());
+        config.handlebars.registerPartial('$.styles', GetStylesTemplate());
+        config.handlebars.registerPartial('$.scripts', GetScriptsTemplate());
     });
 }
 
@@ -92,7 +96,7 @@ export function generateHtmlOutput(config: TemplateEngineConfig, templates: Temp
         .then((files: string[]) => {
             return getDataFromJsonFiles(config, files);
         }).then((templateData: TemplateData[]) => {
-            return compileTemplates(templates, templateData);
+            return compileTemplates(config, templates, templateData);
         });
 }
 
@@ -111,10 +115,11 @@ export function getDataFromJsonFiles(config: TemplateEngineConfig, files: string
     return Promise.all(operations);
 }
 
-export function compileTemplates(templates: TemplateObject[], data: TemplateData[]) {
+export function compileTemplates(config: TemplateEngineConfig, templates: TemplateObject[], data: TemplateData[]) {
     var dataMap = {};
     for (var i = 0; i < data.length; i++) {
         dataMap[data[i].name] = data[i].data;
+        dataMap[data[i].name]["$"] = config.config;
     }
     let rslt: TemplateData[] = templates.map((template: TemplateObject) => {
         return {

@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var meta_tags_1 = require("./defaults/meta-tags");
+var styles_1 = require("./defaults/styles");
+var scripts_1 = require("./defaults/scripts");
 var nodePath = require("path");
 var Promise = require("promise");
 function HtmlTemplateEngine(config) {
@@ -17,6 +19,8 @@ exports.HtmlTemplateEngine = HtmlTemplateEngine;
 function generatePartials(config) {
     return generatePartialsFromFiles(config).then(function () {
         config.handlebars.registerPartial('$.tags', meta_tags_1.GetMetaTagsTemplate());
+        config.handlebars.registerPartial('$.styles', styles_1.GetStylesTemplate());
+        config.handlebars.registerPartial('$.scripts', scripts_1.GetScriptsTemplate());
     });
 }
 exports.generatePartials = generatePartials;
@@ -87,7 +91,7 @@ function generateHtmlOutput(config, templates) {
         .then(function (files) {
         return getDataFromJsonFiles(config, files);
     }).then(function (templateData) {
-        return compileTemplates(templates, templateData);
+        return compileTemplates(config, templates, templateData);
     });
 }
 exports.generateHtmlOutput = generateHtmlOutput;
@@ -106,10 +110,11 @@ function getDataFromJsonFiles(config, files) {
     return Promise.all(operations);
 }
 exports.getDataFromJsonFiles = getDataFromJsonFiles;
-function compileTemplates(templates, data) {
+function compileTemplates(config, templates, data) {
     var dataMap = {};
     for (var i = 0; i < data.length; i++) {
         dataMap[data[i].name] = data[i].data;
+        dataMap[data[i].name]["$"] = config.config;
     }
     var rslt = templates.map(function (template) {
         return {
