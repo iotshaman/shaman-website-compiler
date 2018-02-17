@@ -1,5 +1,10 @@
 {
     "title": "Sample Title",
     "description": "Sample Description",
-    "og_title": "test-val"
+    "og_title": "Open Graph Title",
+    "og_type": "Open Graph Type",
+    "og_description": "Open Graph Description",
+    "og_url": "Open Graph Url",
+    "og_image": "Open Graph Image",
+    "twitter_user": "iotshaman"
 }
