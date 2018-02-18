@@ -5,7 +5,6 @@ export class WebsiteConfig {
     defaults: WebpageDefaults;
     scripts?: string[];
     styles?: string[];
-    express?: boolean;
 }
 
 export interface WebpageDefaults {

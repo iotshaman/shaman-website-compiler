@@ -5,10 +5,14 @@ var template_engine_1 = require("./template-engine");
 function TemplateEngineFactory(config) {
     var glob = glob_factory_1.GlobFactory({ cwd: config.cwd });
     return template_engine_1.TemplateEngine({
-        glob: glob,
-        config: config,
         fsx: require('fs-extra'),
-        handlebars: require('handlebars')
+        handlebars: require('handlebars'),
+        cwd: config.cwd,
+        defaults: config.defaults,
+        pages: config.pages,
+        partials: config.partials,
+        styles: config.styles,
+        scripts: config.scripts
     });
 }
 exports.TemplateEngineFactory = TemplateEngineFactory;

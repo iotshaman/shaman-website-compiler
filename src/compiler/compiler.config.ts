@@ -1,13 +1,14 @@
 import { WebsiteConfig, WebpageDefaults } from '../config/website.config';
 import * as Promise from 'promise';
 
-export class TemplateEngineConfig {
+export class CompilerConfig {
+    glob: (patterns: string[]) => Promise<string[]>;
     fsx: any;
     handlebars: any;
     cwd: string;
-    defaults: WebpageDefaults;
+    partials: string[];
     pages: string[];
-    partials?: string[];
+    defaults: WebpageDefaults;
     scripts?: string[];
     styles?: string[];
 }

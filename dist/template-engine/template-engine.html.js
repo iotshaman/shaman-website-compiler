@@ -25,44 +25,38 @@ function generatePartials(config) {
 }
 exports.generatePartials = generatePartials;
 function generatePartialsFromFiles(config) {
-    return config.glob(config.config.partials)
-        .then(function (files) {
-        return createInsertOperations(config, files);
-    })
-        .then(insertHandlebarsPartials);
+    var operations = createReadOperations(config);
+    return insertHandlebarsPartials(operations);
 }
 exports.generatePartialsFromFiles = generatePartialsFromFiles;
-function createInsertOperations(config, files) {
-    return files.map(function (file) {
+function createReadOperations(config) {
+    var rslt = config.partials.map(function (file) {
         return new Promise(function (res, err) {
-            var path = nodePath.join(config.config.cwd, file);
+            var path = nodePath.join(config.cwd, file);
             return config.fsx.readFile(path, "utf8", function (err, contents) {
                 config.handlebars.registerPartial(file, contents);
                 res();
             });
         });
     });
+    return rslt;
 }
-exports.createInsertOperations = createInsertOperations;
+exports.createReadOperations = createReadOperations;
 function insertHandlebarsPartials(operations) {
     return Promise.all(operations).then(function () { return; });
 }
 exports.insertHandlebarsPartials = insertHandlebarsPartials;
 // GENERATE TEMPALTE OBJECT
 function generateTemplatesFromFiles(config) {
-    return config.glob(config.config.pages)
-        .then(function (files) {
-        return getTemplateData(config, files);
-    })
-        .then(function (data) {
+    return getTemplateData(config).then(function (data) {
         return createTemplateObject(config, data);
     });
 }
 exports.generateTemplatesFromFiles = generateTemplatesFromFiles;
-function getTemplateData(config, files) {
-    var operations = files.map(function (file) {
+function getTemplateData(config) {
+    var operations = config.pages.map(function (file) {
         return new Promise(function (res, err) {
-            var path = nodePath.join(config.config.cwd, file);
+            var path = nodePath.join(config.cwd, file);
             return config.fsx.readFile(path, "utf8", function (err, contents) {
                 res({
                     file: file,
@@ -87,18 +81,15 @@ function createTemplateObject(config, data) {
 exports.createTemplateObject = createTemplateObject;
 // GENERATE HTML OUTPUT
 function generateHtmlOutput(config, templates) {
-    return config.glob(config.config.pages)
-        .then(function (files) {
-        return getDataFromJsonFiles(config, files);
-    }).then(function (templateData) {
+    return getDataFromJsonFiles(config).then(function (templateData) {
         return compileTemplates(config, templates, templateData);
     });
 }
 exports.generateHtmlOutput = generateHtmlOutput;
-function getDataFromJsonFiles(config, files) {
-    var operations = files.map(function (file) {
+function getDataFromJsonFiles(config) {
+    var operations = config.pages.map(function (file) {
         return new Promise(function (res, err) {
-            var path = nodePath.join(config.config.cwd, getJsonExtensionFromHtml(file));
+            var path = nodePath.join(config.cwd, getJsonExtensionFromHtml(file));
             return config.fsx.readJson(path, function (err, data) {
                 res({
                     name: file,
@@ -114,7 +105,11 @@ function compileTemplates(config, templates, data) {
     var dataMap = {};
     for (var i = 0; i < data.length; i++) {
         dataMap[data[i].name] = data[i].data;
-        dataMap[data[i].name]["$"] = config.config;
+        dataMap[data[i].name]["$"] = {
+            scripts: config.scripts,
+            stypes: config.styles,
+            defaults: config.defaults
+        };
     }
     var rslt = templates.map(function (template) {
         return {

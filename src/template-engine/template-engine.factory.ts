@@ -6,9 +6,13 @@ import * as Promise from 'promise';
 export function TemplateEngineFactory(config: WebsiteConfig) {
     var glob = GlobFactory({ cwd: config.cwd });
     return TemplateEngine({ 
-        glob: glob, 
-        config: config,
-        fsx: require('fs-extra'),
-        handlebars: require('handlebars')
+        fsx: require('fs-extra'),        
+        handlebars: require('handlebars'),
+        cwd: config.cwd,
+        defaults: config.defaults,
+        pages: config.pages,
+        partials: config.partials,
+        styles: config.styles,
+        scripts: config.scripts
     });
 }

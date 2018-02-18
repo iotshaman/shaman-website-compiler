@@ -25,23 +25,21 @@ export function generatePartials(config: TemplateEngineConfig) {
 }
 
 export function generatePartialsFromFiles(config: TemplateEngineConfig) {
-    return config.glob(config.config.partials)
-        .then((files: string[]) => { 
-            return createInsertOperations(config, files); 
-        })
-        .then(insertHandlebarsPartials);
+    var operations = createReadOperations(config);
+    return insertHandlebarsPartials(operations);
 }
 
-export function createInsertOperations(config: TemplateEngineConfig, files: string[]): Promise<void>[] {
-    return files.map((file: string) => {
+export function createReadOperations(config: TemplateEngineConfig) {
+    let rslt: Promise<void>[] = config.partials.map((file: string) => {
         return new Promise((res, err) => {            
-            let path = nodePath.join(config.config.cwd, file);
+            let path = nodePath.join(config.cwd, file);
             return config.fsx.readFile(path,  "utf8", (err: any, contents: string) => {
                 config.handlebars.registerPartial(file, contents);
                 res();
             });
         })
     });
+    return rslt;
 }
 
 export function insertHandlebarsPartials(operations: Promise<void>[]) {
@@ -50,19 +48,15 @@ export function insertHandlebarsPartials(operations: Promise<void>[]) {
 
 // GENERATE TEMPALTE OBJECT
 export function generateTemplatesFromFiles(config: TemplateEngineConfig) {
-    return config.glob(config.config.pages)
-        .then((files: string[]) => {
-            return getTemplateData(config, files)
-        })
-        .then((data) => {
-            return createTemplateObject(config, data);
-        });
+    return getTemplateData(config).then((data) => {
+        return createTemplateObject(config, data);
+    });
 }
 
-export function getTemplateData(config: TemplateEngineConfig, files: string[]) {
-    var operations = files.map((file: string) => {
+export function getTemplateData(config: TemplateEngineConfig) {
+    var operations = config.pages.map((file: string) => {
         return new Promise((res, err) => {            
-            let path = nodePath.join(config.config.cwd, file);
+            let path = nodePath.join(config.cwd, file);
             return config.fsx.readFile(path,  "utf8", (err: any, contents: string) => {
                 res({
                     file: file,
@@ -92,18 +86,15 @@ export interface TemplateObject {
 
 // GENERATE HTML OUTPUT
 export function generateHtmlOutput(config: TemplateEngineConfig, templates: TemplateObject[]) {
-    return config.glob(config.config.pages)
-        .then((files: string[]) => {
-            return getDataFromJsonFiles(config, files);
-        }).then((templateData: TemplateData[]) => {
-            return compileTemplates(config, templates, templateData);
-        });
+    return getDataFromJsonFiles(config).then((templateData: TemplateData[]) => {
+        return compileTemplates(config, templates, templateData)
+    });
 }
 
-export function getDataFromJsonFiles(config: TemplateEngineConfig, files: string[]) {
-    let operations: Promise<TemplateData>[] = files.map((file: string) => {
+export function getDataFromJsonFiles(config: TemplateEngineConfig) {
+    let operations: Promise<TemplateData>[] = config.pages.map((file: string) => {
         return new Promise((res, err) => {            
-            let path = nodePath.join(config.config.cwd, getJsonExtensionFromHtml(file));
+            let path = nodePath.join(config.cwd, getJsonExtensionFromHtml(file));
             return config.fsx.readJson(path, (err: any, data: any) => {
                 res({
                     name: file,
@@ -119,7 +110,11 @@ export function compileTemplates(config: TemplateEngineConfig, templates: Templa
     var dataMap = {};
     for (var i = 0; i < data.length; i++) {
         dataMap[data[i].name] = data[i].data;
-        dataMap[data[i].name]["$"] = config.config;
+        dataMap[data[i].name]["$"] = { 
+            scripts: config.scripts,
+            stypes: config.styles,
+            defaults: config.defaults 
+        };
     }
     let rslt: TemplateData[] = templates.map((template: TemplateObject) => {
         return {
@@ -130,12 +125,12 @@ export function compileTemplates(config: TemplateEngineConfig, templates: Templa
     return rslt;
 }
 
-export interface TemplateData {
-    name: string;
-    data: any;
-}
-
 export function getJsonExtensionFromHtml(file: string) {
     var index = file.lastIndexOf('.html');
     return `${file.substring(0, index)}.json`;
+}
+
+export interface TemplateData {
+    name: string;
+    data: any;
 }
