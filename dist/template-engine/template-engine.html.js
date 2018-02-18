@@ -7,12 +7,8 @@ var nodePath = require("path");
 var Promise = require("promise");
 function HtmlTemplateEngine(config) {
     return generatePartials(config)
-        .then(function () {
-        return generateTemplatesFromFiles(config);
-    })
-        .then(function (templates) {
-        return generateHtmlOutput(config, templates);
-    });
+        .then(function () { return generateTemplatesFromFiles(config); })
+        .then(function (templates) { return generateHtmlOutput(config, templates); });
 }
 exports.HtmlTemplateEngine = HtmlTemplateEngine;
 // GENERATE PARTIAL FILES
@@ -25,11 +21,11 @@ function generatePartials(config) {
 }
 exports.generatePartials = generatePartials;
 function generatePartialsFromFiles(config) {
-    var operations = createReadOperations(config);
+    var operations = getHtmlPartialFiles(config);
     return insertHandlebarsPartials(operations);
 }
 exports.generatePartialsFromFiles = generatePartialsFromFiles;
-function createReadOperations(config) {
+function getHtmlPartialFiles(config) {
     var rslt = config.partials.map(function (file) {
         return new Promise(function (res, err) {
             var path = nodePath.join(config.cwd, file);
@@ -41,7 +37,7 @@ function createReadOperations(config) {
     });
     return rslt;
 }
-exports.createReadOperations = createReadOperations;
+exports.getHtmlPartialFiles = getHtmlPartialFiles;
 function insertHandlebarsPartials(operations) {
     return Promise.all(operations).then(function () { return; });
 }
@@ -103,18 +99,19 @@ function getDataFromJsonFiles(config) {
 exports.getDataFromJsonFiles = getDataFromJsonFiles;
 function compileTemplates(config, templates, data) {
     var dataMap = {};
+    var systemOptions = {
+        scripts: (config.isProd && config.scripts.length > 0) ? ['scripts.bundle.min.js'] : config.scripts,
+        styles: (config.isProd && config.styles.length > 0) ? ['styles.bundle.min.css'] : config.styles,
+        defaults: config.defaults
+    };
     for (var i = 0; i < data.length; i++) {
         dataMap[data[i].name] = data[i].data;
-        dataMap[data[i].name]["$"] = {
-            scripts: config.scripts,
-            stypes: config.styles,
-            defaults: config.defaults
-        };
+        dataMap[data[i].name]["$"] = systemOptions;
     }
     var rslt = templates.map(function (template) {
         return {
             name: template.name,
-            data: template.compile(dataMap[template.name])
+            contents: template.compile(dataMap[template.name])
         };
     });
     return rslt;

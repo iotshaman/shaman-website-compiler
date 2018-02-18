@@ -10,4 +10,5 @@ export class TemplateEngineConfig {
     partials?: string[];
     scripts?: string[];
     styles?: string[];
+    isProd?: boolean;
 }

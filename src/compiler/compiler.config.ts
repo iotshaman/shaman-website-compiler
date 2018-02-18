@@ -5,10 +5,12 @@ export class CompilerConfig {
     glob: (patterns: string[]) => Promise<string[]>;
     fsx: any;
     handlebars: any;
+    minify: (contents: string) => any;
     cwd: string;
     partials: string[];
     pages: string[];
     defaults: WebpageDefaults;
     scripts?: string[];
     styles?: string[];
+    isProd?: boolean;
 }

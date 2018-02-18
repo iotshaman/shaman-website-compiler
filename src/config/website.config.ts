@@ -5,9 +5,15 @@ export class WebsiteConfig {
     defaults: WebpageDefaults;
     scripts?: string[];
     styles?: string[];
+    isProd?: boolean;
 }
 
 export interface WebpageDefaults {
     title: string;
     description: string;
+}
+
+export interface FileContents {
+    name: string;
+    contents: string;
 }

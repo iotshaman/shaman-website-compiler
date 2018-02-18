@@ -1,10 +1,11 @@
+import { FileContents } from '../config/website.config';
 import { TemplateEngineConfig } from './template-engine.config'
-import { HtmlTemplateEngine, TemplateData } from './template-engine.html';
+import { HtmlTemplateEngine } from './template-engine.html';
 import * as nodePath from 'path';
 import * as Promise from 'promise';
 
 export interface TemplateEngineApi {
-    generateFileOutput: () => Promise<TemplateData[]>;
+    generateFileOutput: () => Promise<FileContents[]>;
     generateExpressRoutes: (express: any) => any;
 }
 
@@ -16,7 +17,7 @@ export function TemplateEngine(config: TemplateEngineConfig): TemplateEngineApi 
 }
 
 function generateExpressRoutes(config: TemplateEngineConfig, express: any) {
-    return HtmlTemplateEngine(config).then((templates: TemplateData[]) => {
+    return HtmlTemplateEngine(config).then((templates: FileContents[]) => {
         return mapExpressRoutes(templates, 'text/html');
     }).then((map: any) => {
         express.all('*', function(req, res, next) {
@@ -30,12 +31,12 @@ function generateExpressRoutes(config: TemplateEngineConfig, express: any) {
     });
 }
 
-function mapExpressRoutes(templates: TemplateData[], mimeType: string) {
+function mapExpressRoutes(templates: FileContents[], mimeType: string) {
     var map = {};
     for (let i = 0; i < templates.length; i++) {
         map[`/${templates[i].name}`] = (req, res, next) => {
             res.writeHead(200, {'Content-Type': mimeType});
-            res.write(templates[i].data);
+            res.write(templates[i].contents);
             return res.end();
         }
     }

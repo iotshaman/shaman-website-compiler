@@ -9,11 +9,13 @@ export function ShamanWebsiteCompilerFactory(config: WebsiteConfig) {
         glob: glob, 
         fsx: require('fs-extra'),
         handlebars: require('handlebars'),
+        minify: require('uglify-es').minify,
         cwd: config.cwd,
         partials: config.partials,
         pages: config.pages,
         defaults: config.defaults,
         scripts: config.scripts,
-        styles: config.styles
+        styles: config.styles,
+        isProd: config.isProd
     });
 }

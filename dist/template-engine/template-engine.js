@@ -28,7 +28,7 @@ function mapExpressRoutes(templates, mimeType) {
     var _loop_1 = function (i) {
         map["/" + templates[i].name] = function (req, res, next) {
             res.writeHead(200, { 'Content-Type': mimeType });
-            res.write(templates[i].data);
+            res.write(templates[i].contents);
             return res.end();
         };
     };

@@ -1,3 +1,4 @@
+import { FileContents } from '../config/website.config';
 import { TemplateEngineConfig } from './template-engine.config';
 import { GetMetaTagsTemplate } from './defaults/meta-tags';
 import { GetStylesTemplate } from './defaults/styles';
@@ -5,14 +6,10 @@ import { GetScriptsTemplate } from './defaults/scripts';
 import * as nodePath from 'path';
 import * as Promise from 'promise';
 
-export function HtmlTemplateEngine(config: TemplateEngineConfig): Promise<any> {
+export function HtmlTemplateEngine(config: TemplateEngineConfig): Promise<FileContents[]> {
     return generatePartials(config)
-        .then(() => { 
-            return generateTemplatesFromFiles(config); 
-        })
-        .then((templates: TemplateObject[]) => { 
-            return generateHtmlOutput(config, templates); 
-        });
+        .then(() => {  return generateTemplatesFromFiles(config); })
+        .then((templates: TemplateObject[]) => { return generateHtmlOutput(config, templates); });
 }
 
 // GENERATE PARTIAL FILES
@@ -25,11 +22,11 @@ export function generatePartials(config: TemplateEngineConfig) {
 }
 
 export function generatePartialsFromFiles(config: TemplateEngineConfig) {
-    var operations = createReadOperations(config);
+    var operations = getHtmlPartialFiles(config);
     return insertHandlebarsPartials(operations);
 }
 
-export function createReadOperations(config: TemplateEngineConfig) {
+export function getHtmlPartialFiles(config: TemplateEngineConfig) {
     let rslt: Promise<void>[] = config.partials.map((file: string) => {
         return new Promise((res, err) => {            
             let path = nodePath.join(config.cwd, file);
@@ -108,18 +105,19 @@ export function getDataFromJsonFiles(config: TemplateEngineConfig) {
 
 export function compileTemplates(config: TemplateEngineConfig, templates: TemplateObject[], data: TemplateData[]) {
     var dataMap = {};
+    var systemOptions = { 
+        scripts: (config.isProd && config.scripts.length > 0) ? ['scripts.bundle.min.js'] : config.scripts,
+        styles: (config.isProd && config.styles.length > 0) ? ['styles.bundle.min.css'] : config.styles,
+        defaults: config.defaults 
+    }
     for (var i = 0; i < data.length; i++) {
         dataMap[data[i].name] = data[i].data;
-        dataMap[data[i].name]["$"] = { 
-            scripts: config.scripts,
-            stypes: config.styles,
-            defaults: config.defaults 
-        };
+        dataMap[data[i].name]["$"] = systemOptions;
     }
-    let rslt: TemplateData[] = templates.map((template: TemplateObject) => {
+    let rslt: FileContents[] = templates.map((template: TemplateObject) => {
         return {
             name: template.name,
-            data: template.compile(dataMap[template.name])
+            contents: template.compile(dataMap[template.name])
         }
     });
     return rslt;

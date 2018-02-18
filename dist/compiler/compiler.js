@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var template_engine_1 = require("../template-engine/template-engine");
+var javascript_engine_1 = require("../javascript-engine/javascript-engine");
 var Promise = require("promise");
 function ShamanWebsiteCompiler(config) {
     return {
@@ -52,12 +53,18 @@ function loadCompilerEngines(config, globMap) {
             pages: !globMap['pages'] ? [] : globMap['pages'],
             partials: !globMap['partials'] ? [] : globMap['partials'],
             styles: !globMap['styles'] ? [] : globMap['styles'],
-            scripts: !globMap['scripts'] ? [] : globMap['scripts']
+            scripts: !globMap['scripts'] ? [] : globMap['scripts'],
+            isProd: config.isProd
+        }),
+        javascriptEngine: javascript_engine_1.JavascriptEngine({
+            fsx: config.fsx,
+            minify: config.minify,
+            cwd: config.cwd,
+            scripts: !globMap['scripts'] ? [] : globMap['scripts'],
+            isProd: config.isProd
         })
     };
-    return engines.templateEngine.generateFileOutput().then(function (data) {
-        return data;
-    });
+    return engines;
 }
 exports.loadCompilerEngines = loadCompilerEngines;
 //# sourceMappingURL=compiler.js.map

@@ -1,5 +1,6 @@
 import { CompilerConfig } from './compiler.config';
 import { TemplateEngine } from '../template-engine/template-engine';
+import { JavascriptEngine } from '../javascript-engine/javascript-engine';
 import * as Promise from 'promise';
 
 export function ShamanWebsiteCompiler(config: CompilerConfig) {
@@ -61,10 +62,16 @@ export function loadCompilerEngines(config: CompilerConfig, globMap: GlobMap) {
             pages: !globMap['pages'] ? [] : globMap['pages'],
             partials: !globMap['partials'] ? [] : globMap['partials'],
             styles: !globMap['styles'] ? [] : globMap['styles'],
-            scripts: !globMap['scripts'] ? [] : globMap['scripts']
+            scripts: !globMap['scripts'] ? [] : globMap['scripts'],
+            isProd: config.isProd
+        }),
+        javascriptEngine: JavascriptEngine({
+            fsx: config.fsx,
+            minify: config.minify,
+            cwd: config.cwd,
+            scripts: !globMap['scripts'] ? [] : globMap['scripts'],
+            isProd: config.isProd
         })
     }
-    return engines.templateEngine.generateFileOutput().then((data) => {
-        return data;
-    })
+    return engines;
 }
