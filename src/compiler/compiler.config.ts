@@ -6,6 +6,7 @@ export class CompilerConfig {
     fsx: any;
     handlebars: any;
     minify: (contents: string) => any;
+    minifyCss: (contents: string) => any;
     cwd: string;
     partials: string[];
     pages: string[];

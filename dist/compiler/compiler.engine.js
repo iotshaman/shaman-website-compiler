@@ -11,7 +11,8 @@ exports.CompilerEngine = CompilerEngine;
 function generateAllFiles(engines) {
     return Promise.all([
         engines.templateEngine.generateFileOutput(),
-        engines.javascriptEngine.generateFileOutput()
+        engines.javascriptEngine.generateFileOutput(),
+        engines.cssEngine.generateFileOutput()
     ]).then(function (contents) {
         return contents.reduce(function (a, b) { return a.concat(b); });
     });
@@ -20,7 +21,8 @@ exports.generateAllFiles = generateAllFiles;
 function generateAllExpressRoutes(engines, express) {
     return Promise.all([
         engines.templateEngine.generateExpressRoutes(express),
-        engines.javascriptEngine.generateExpressRoutes(express)
+        engines.javascriptEngine.generateExpressRoutes(express),
+        engines.cssEngine.generateExpressRoutes(express)
     ]).then(function () { return; });
 }
 exports.generateAllExpressRoutes = generateAllExpressRoutes;

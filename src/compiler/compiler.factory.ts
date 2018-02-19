@@ -10,6 +10,7 @@ export function ShamanWebsiteCompilerFactory(config: WebsiteConfig) {
         fsx: require('fs-extra'),
         handlebars: require('handlebars'),
         minify: require('uglify-es').minify,
+        minifyCss: require('clean-css'),
         cwd: config.cwd,
         partials: config.partials,
         pages: config.pages,

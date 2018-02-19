@@ -17,7 +17,8 @@ export function CompilerEngine(engines: CompilerEngineList): CompilerEngineApi {
 export function generateAllFiles(engines: CompilerEngineList) {
     return Promise.all([
         engines.templateEngine.generateFileOutput(),
-        engines.javascriptEngine.generateFileOutput()
+        engines.javascriptEngine.generateFileOutput(),
+        engines.cssEngine.generateFileOutput()
     ]).then((contents: FileContents[][]) => {
         return contents.reduce((a, b) => { return a.concat(b); });
     });
@@ -26,6 +27,7 @@ export function generateAllFiles(engines: CompilerEngineList) {
 export function generateAllExpressRoutes(engines: CompilerEngineList, express: any) {
     return Promise.all([
         engines.templateEngine.generateExpressRoutes(express),
-        engines.javascriptEngine.generateExpressRoutes(express)
+        engines.javascriptEngine.generateExpressRoutes(express),
+        engines.cssEngine.generateExpressRoutes(express)
     ]).then(() => { return; });
 }

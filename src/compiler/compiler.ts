@@ -1,6 +1,7 @@
 import { CompilerConfig } from './compiler.config';
 import { TemplateEngine } from '../template-engine/template-engine';
 import { JavascriptEngine } from '../javascript-engine/javascript-engine';
+import { CssEngine } from '../css-engine/css-engine';
 import * as Promise from 'promise';
 import { CompilerEngineApi, CompilerEngine } from './compiler.engine';
 
@@ -74,6 +75,13 @@ export function loadCompilerEngines(config: CompilerConfig, globMap: GlobMap) {
             cwd: config.cwd,
             scripts: !globMap['scripts'] ? [] : globMap['scripts'],
             isProd: config.isProd
+        }),
+        cssEngine: CssEngine({
+            fsx: config.fsx,
+            minify: config.minifyCss,
+            cwd: config.cwd,
+            styles: !globMap['styles'] ? [] : globMap['styles'],
+            isProd: config.isProd
         })
     }
     return engines;
@@ -82,4 +90,5 @@ export function loadCompilerEngines(config: CompilerConfig, globMap: GlobMap) {
 export interface CompilerEngineList {
     templateEngine: CompilerEngineApi;
     javascriptEngine: CompilerEngineApi;
+    cssEngine: CompilerEngineApi;
 }

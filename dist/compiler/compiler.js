@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var template_engine_1 = require("../template-engine/template-engine");
 var javascript_engine_1 = require("../javascript-engine/javascript-engine");
+var css_engine_1 = require("../css-engine/css-engine");
 var Promise = require("promise");
 var compiler_engine_1 = require("./compiler.engine");
 function ShamanWebsiteCompiler(config) {
@@ -64,6 +65,13 @@ function loadCompilerEngines(config, globMap) {
             minify: config.minify,
             cwd: config.cwd,
             scripts: !globMap['scripts'] ? [] : globMap['scripts'],
+            isProd: config.isProd
+        }),
+        cssEngine: css_engine_1.CssEngine({
+            fsx: config.fsx,
+            minify: config.minifyCss,
+            cwd: config.cwd,
+            styles: !globMap['styles'] ? [] : globMap['styles'],
             isProd: config.isProd
         })
     };
