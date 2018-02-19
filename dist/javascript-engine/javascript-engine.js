@@ -5,11 +5,12 @@ var Promise = require("promise");
 function JavascriptEngine(config) {
     return {
         generateFileOutput: function () { return generateJavascriptFiles(config); },
+        generateExpressRoutes: function (express) { return generateExpressRoutes(config, express); }
     };
 }
 exports.JavascriptEngine = JavascriptEngine;
 function generateJavascriptFiles(config) {
-    return getJavascriptFiles(config).then(function (files) {
+    return loadJavascriptFiles(config).then(function (files) {
         if (!config.isProd) {
             return files;
         }
@@ -21,7 +22,7 @@ function generateJavascriptFiles(config) {
     });
 }
 exports.generateJavascriptFiles = generateJavascriptFiles;
-function getJavascriptFiles(config) {
+function loadJavascriptFiles(config) {
     var operations = config.scripts.map(function (file) {
         return new Promise(function (res, err) {
             var path = nodePath.join(config.cwd, file);
@@ -35,7 +36,7 @@ function getJavascriptFiles(config) {
     });
     return Promise.all(operations);
 }
-exports.getJavascriptFiles = getJavascriptFiles;
+exports.loadJavascriptFiles = loadJavascriptFiles;
 // FILE COMPRESSION
 function getCompressedJavascriptFiles(minify, files) {
     var options = {
@@ -62,4 +63,33 @@ function getJavascriptFileMap(files) {
     return map;
 }
 exports.getJavascriptFileMap = getJavascriptFileMap;
+function generateExpressRoutes(config, express) {
+    return generateJavascriptFiles(config).then(function (templates) {
+        return mapExpressRoutes(templates, 'text/javascript');
+    }).then(function (map) {
+        express.all('*', function (req, res, next) {
+            if (req.method == "GET" && !!map[req.url]) {
+                map[req.url](req, res, next);
+            }
+            else {
+                next();
+            }
+        });
+        return;
+    });
+}
+function mapExpressRoutes(templates, mimeType) {
+    var map = {};
+    var _loop_1 = function (i) {
+        map["/" + templates[i].name] = function (req, res, next) {
+            res.writeHead(200, { 'Content-Type': mimeType });
+            res.write(templates[i].contents);
+            return res.end();
+        };
+    };
+    for (var i = 0; i < templates.length; i++) {
+        _loop_1(i);
+    }
+    return map;
+}
 //# sourceMappingURL=javascript-engine.js.map

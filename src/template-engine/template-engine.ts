@@ -1,15 +1,11 @@
+import { CompilerEngineApi } from '../compiler/compiler.engine';
 import { FileContents } from '../config/website.config';
 import { TemplateEngineConfig } from './template-engine.config'
 import { HtmlTemplateEngine } from './template-engine.html';
 import * as nodePath from 'path';
 import * as Promise from 'promise';
 
-export interface TemplateEngineApi {
-    generateFileOutput: () => Promise<FileContents[]>;
-    generateExpressRoutes: (express: any) => any;
-}
-
-export function TemplateEngine(config: TemplateEngineConfig): TemplateEngineApi {
+export function TemplateEngine(config: TemplateEngineConfig): CompilerEngineApi {
     return {
         generateFileOutput: () => { return HtmlTemplateEngine(config); },
         generateExpressRoutes: (express) => { return generateExpressRoutes(config, express); }

@@ -2,6 +2,7 @@ import { CompilerConfig } from './compiler.config';
 import { TemplateEngine } from '../template-engine/template-engine';
 import { JavascriptEngine } from '../javascript-engine/javascript-engine';
 import * as Promise from 'promise';
+import { CompilerEngineApi, CompilerEngine } from './compiler.engine';
 
 export function ShamanWebsiteCompiler(config: CompilerConfig) {
     return {
@@ -12,6 +13,8 @@ export function ShamanWebsiteCompiler(config: CompilerConfig) {
 export function compileWebsite(config: CompilerConfig) {
     return loadFileDataFromGlobs(config).then((globMap: GlobMap) => {
         return loadCompilerEngines(config, globMap);  
+    }).then((engines: CompilerEngineList) => {
+        return CompilerEngine(engines);
     });
 }
 
@@ -53,7 +56,7 @@ export interface GlobMap {
 
 // LOAD ENGINES
 export function loadCompilerEngines(config: CompilerConfig, globMap: GlobMap) {
-    var engines = {
+    let engines: CompilerEngineList = {
         templateEngine: TemplateEngine({
             fsx: config.fsx,
             handlebars: config.handlebars,
@@ -74,4 +77,9 @@ export function loadCompilerEngines(config: CompilerConfig, globMap: GlobMap) {
         })
     }
     return engines;
+}
+
+export interface CompilerEngineList {
+    templateEngine: CompilerEngineApi;
+    javascriptEngine: CompilerEngineApi;
 }
