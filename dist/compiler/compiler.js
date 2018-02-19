@@ -7,12 +7,11 @@ var css_engine_1 = require("../css-engine/css-engine");
 var Promise = require("promise");
 function ShamanWebsiteCompiler(config) {
     return {
-        compile: function () { return compileWebsite(config); }
+        compile: function (express) { return compileWebsite(config, express); }
     };
 }
 exports.ShamanWebsiteCompiler = ShamanWebsiteCompiler;
 function compileWebsite(config, express) {
-    if (express === void 0) { express = null; }
     return loadFileDataFromGlobs(config).then(function (globMap) {
         return loadCompilerEngines(config, globMap);
     }).then(function (engines) {

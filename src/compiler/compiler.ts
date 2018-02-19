@@ -8,11 +8,11 @@ import * as Promise from 'promise';
 
 export function ShamanWebsiteCompiler(config: CompilerConfig) {
     return {
-        compile: () => { return compileWebsite(config); }
+        compile: (express?: any) => { return compileWebsite(config, express); }
     }
 }
 
-export function compileWebsite(config: CompilerConfig, express: any = null) {
+export function compileWebsite(config: CompilerConfig, express?: any) {
     return loadFileDataFromGlobs(config).then((globMap: GlobMap) => {
         return loadCompilerEngines(config, globMap);  
     }).then((engines: CompilerEngineList) => {
