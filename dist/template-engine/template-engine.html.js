@@ -83,13 +83,14 @@ function generateHtmlOutput(config, templates) {
 }
 exports.generateHtmlOutput = generateHtmlOutput;
 function getDataFromJsonFiles(config) {
+    var defaultPageData = { title: 'Page Title', description: 'Page Description' };
     var operations = config.pages.map(function (file) {
         return new Promise(function (res, err) {
             var path = nodePath.join(config.cwd, getJsonExtensionFromHtml(file));
             return config.fsx.readJson(path, function (err, data) {
                 res({
                     name: file,
-                    data: data
+                    data: err ? defaultPageData : data
                 });
             });
         });

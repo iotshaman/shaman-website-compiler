@@ -89,13 +89,14 @@ export function generateHtmlOutput(config: TemplateEngineConfig, templates: Temp
 }
 
 export function getDataFromJsonFiles(config: TemplateEngineConfig) {
+    let defaultPageData = { title: 'Page Title', description: 'Page Description' };
     let operations: Promise<TemplateData>[] = config.pages.map((file: string) => {
         return new Promise((res, err) => {            
             let path = nodePath.join(config.cwd, getJsonExtensionFromHtml(file));
             return config.fsx.readJson(path, (err: any, data: any) => {
                 res({
                     name: file,
-                    data: data
+                    data: err ? defaultPageData : data
                 });
             });
         })

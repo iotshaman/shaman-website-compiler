@@ -1,9 +1,9 @@
 const tags: string[] = [
     pageTitle(),
-    metaTag('description'),
-    openGraph('og:title', 'og_title'),
+    metaTag('description', 'description'),
     openGraph('og:type', 'og_type'),
-    openGraph('og:description', 'og_description'),
+    openGraph('og:title', 'title'),
+    openGraph('og:description', 'description'),
     openGraph('og:url', 'og_url'),
     openGraph('og:image', 'og_image'),
     twitterCardTag(),
@@ -31,9 +31,9 @@ function pageTitle() {
     return `<title>${ifElse('title', 'title', '$.defaults.title')}</title>\r\n`;
 }
 
-function metaTag(name) {
-    var defaultVal = `$.defaults.${name}` 
-    return `<meta name="${name}" content="${ifElse(name, name, defaultVal)}">\r\n`;
+function metaTag(name, prop, defaultVal?) {
+    if (!defaultVal) defaultVal = `$.defaults.${prop}` 
+    return `<meta name="${name}" content="${ifElse(prop, name, defaultVal)}">\r\n`;
 }
 
 function openGraph(prop, val) {
@@ -43,12 +43,12 @@ function openGraph(prop, val) {
 
 function twitterCardTag() {
     var condition = `{{#if twitter_type}}{{ twitter_type }}{{else}}summary{{/if}}`;
-    return `<meta name="twitter:card" content="${condition}">\r\n`;
+    return truthy('twitter_user', `<meta name="twitter:card" content="${condition}">\r\n`);
 }
 
 function twitterTag(prop, val) {
     var newProp = `<meta name="${prop}" content="{{${val}}}">\r\n`;
-    return truthy(val, newProp);
+    return truthy('twitter_user', truthy(val, newProp));
 }
 
 function googlePublisherTag() {
