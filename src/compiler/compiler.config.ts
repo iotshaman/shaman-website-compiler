@@ -14,4 +14,5 @@ export class CompilerConfig {
     scripts?: string[];
     styles?: string[];
     isProd?: boolean;
+    express?: boolean;
 }

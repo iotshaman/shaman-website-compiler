@@ -1,9 +1,10 @@
 import { CompilerConfig } from './compiler.config';
+import { FileContents } from '../config/website.config';
+import { CompilerEngineApi, CompilerEngine } from './compiler.engine';
 import { TemplateEngine } from '../template-engine/template-engine';
 import { JavascriptEngine } from '../javascript-engine/javascript-engine';
 import { CssEngine } from '../css-engine/css-engine';
 import * as Promise from 'promise';
-import { CompilerEngineApi, CompilerEngine } from './compiler.engine';
 
 export function ShamanWebsiteCompiler(config: CompilerConfig) {
     return {
@@ -11,11 +12,16 @@ export function ShamanWebsiteCompiler(config: CompilerConfig) {
     }
 }
 
-export function compileWebsite(config: CompilerConfig) {
+export function compileWebsite(config: CompilerConfig, express: any = null) {
     return loadFileDataFromGlobs(config).then((globMap: GlobMap) => {
         return loadCompilerEngines(config, globMap);  
     }).then((engines: CompilerEngineList) => {
         return CompilerEngine(engines);
+    }).then((compilerEngine: CompilerEngineApi): Promise<void | FileContents[]> => {
+        if (!express) {
+            return compilerEngine.generateFileOutput();
+        }
+        return compilerEngine.generateExpressRoutes(express);
     });
 }
 

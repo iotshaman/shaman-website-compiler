@@ -1,21 +1,27 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var compiler_engine_1 = require("./compiler.engine");
 var template_engine_1 = require("../template-engine/template-engine");
 var javascript_engine_1 = require("../javascript-engine/javascript-engine");
 var css_engine_1 = require("../css-engine/css-engine");
 var Promise = require("promise");
-var compiler_engine_1 = require("./compiler.engine");
 function ShamanWebsiteCompiler(config) {
     return {
         compile: function () { return compileWebsite(config); }
     };
 }
 exports.ShamanWebsiteCompiler = ShamanWebsiteCompiler;
-function compileWebsite(config) {
+function compileWebsite(config, express) {
+    if (express === void 0) { express = null; }
     return loadFileDataFromGlobs(config).then(function (globMap) {
         return loadCompilerEngines(config, globMap);
     }).then(function (engines) {
         return compiler_engine_1.CompilerEngine(engines);
+    }).then(function (compilerEngine) {
+        if (!express) {
+            return compilerEngine.generateFileOutput();
+        }
+        return compilerEngine.generateExpressRoutes(express);
     });
 }
 exports.compileWebsite = compileWebsite;
