@@ -11,4 +11,5 @@ export class TemplateEngineConfig {
     scripts?: string[];
     styles?: string[];
     isProd?: boolean;
+    wwwRoot?: string;
 }

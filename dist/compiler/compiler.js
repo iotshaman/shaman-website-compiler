@@ -70,7 +70,8 @@ function loadCompilerEngines(config, globMap) {
             partials: !globMap['partials'] ? [] : globMap['partials'],
             styles: !globMap['styles'] ? [] : globMap['styles'],
             scripts: !globMap['scripts'] ? [] : globMap['scripts'],
-            isProd: config.isProd
+            isProd: config.isProd,
+            wwwRoot: config.wwwRoot
         }),
         javascriptEngine: javascript_engine_1.JavascriptEngine({
             fsx: config.fsx,

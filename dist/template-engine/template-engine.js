@@ -10,7 +10,7 @@ function TemplateEngine(config) {
 exports.TemplateEngine = TemplateEngine;
 function generateExpressRoutes(config, express) {
     return template_engine_html_1.HtmlTemplateEngine(config).then(function (templates) {
-        return mapExpressRoutes(templates, 'text/html');
+        return mapExpressRoutes(templates, 'text/html', config.wwwRoot);
     }).then(function (map) {
         express.all('*', function (req, res, next) {
             if (req.method == "GET" && !!map[req.url]) {
@@ -23,10 +23,11 @@ function generateExpressRoutes(config, express) {
         return;
     });
 }
-function mapExpressRoutes(templates, mimeType) {
+function mapExpressRoutes(templates, mimeType, wwwRoot) {
     var map = {};
     var _loop_1 = function (i) {
-        map["/" + templates[i].name] = function (req, res, next) {
+        var name_1 = wwwRoot ? templates[i].name.replace(wwwRoot, '') : templates[i].name;
+        map["/" + name_1] = function (req, res, next) {
             res.writeHead(200, { 'Content-Type': mimeType });
             res.write(templates[i].contents);
             return res.end();

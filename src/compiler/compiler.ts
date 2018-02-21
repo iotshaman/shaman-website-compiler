@@ -80,7 +80,8 @@ export function loadCompilerEngines(config: CompilerConfig, globMap: GlobMap) {
             partials: !globMap['partials'] ? [] : globMap['partials'],
             styles: !globMap['styles'] ? [] : globMap['styles'],
             scripts: !globMap['scripts'] ? [] : globMap['scripts'],
-            isProd: config.isProd
+            isProd: config.isProd,
+            wwwRoot: config.wwwRoot
         }),
         javascriptEngine: JavascriptEngine({
             fsx: config.fsx,

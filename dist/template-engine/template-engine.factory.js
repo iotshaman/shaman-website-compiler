@@ -12,7 +12,8 @@ function TemplateEngineFactory(config) {
         pages: config.pages,
         partials: config.partials,
         styles: config.styles,
-        scripts: config.scripts
+        scripts: config.scripts,
+        wwwRoot: config.wwwRoot
     });
 }
 exports.TemplateEngineFactory = TemplateEngineFactory;

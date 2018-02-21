@@ -14,7 +14,7 @@ export function TemplateEngine(config: TemplateEngineConfig): CompilerEngineApi 
 
 function generateExpressRoutes(config: TemplateEngineConfig, express: any) {
     return HtmlTemplateEngine(config).then((templates: FileContents[]) => {
-        return mapExpressRoutes(templates, 'text/html');
+        return mapExpressRoutes(templates, 'text/html', config.wwwRoot);
     }).then((map: any) => {
         express.all('*', function(req, res, next) {
             if (req.method == "GET" && !!map[req.url]) {
@@ -27,10 +27,11 @@ function generateExpressRoutes(config: TemplateEngineConfig, express: any) {
     });
 }
 
-function mapExpressRoutes(templates: FileContents[], mimeType: string) {
+function mapExpressRoutes(templates: FileContents[], mimeType: string, wwwRoot?: string) {
     var map = {};
     for (let i = 0; i < templates.length; i++) {
-        map[`/${templates[i].name}`] = (req, res, next) => {
+        let name = wwwRoot ? templates[i].name.replace(wwwRoot, '') : templates[i].name;
+        map[`/${name}`] = (req, res, next) => {
             res.writeHead(200, {'Content-Type': mimeType});
             res.write(templates[i].contents);
             return res.end();

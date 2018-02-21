@@ -13,6 +13,7 @@ export function TemplateEngineFactory(config: WebsiteConfig) {
         pages: config.pages,
         partials: config.partials,
         styles: config.styles,
-        scripts: config.scripts
+        scripts: config.scripts,
+        wwwRoot: config.wwwRoot
     });
 }

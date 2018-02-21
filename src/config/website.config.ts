@@ -7,6 +7,7 @@ export class WebsiteConfig {
     styles?: string[];
     isProd?: boolean;
     outDir?: string;
+    wwwRoot?: string;
 }
 
 export interface WebpageDefaults {

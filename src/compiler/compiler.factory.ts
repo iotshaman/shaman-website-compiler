@@ -18,6 +18,7 @@ export function ShamanWebsiteCompilerFactory(config: WebsiteConfig) {
         scripts: config.scripts,
         styles: config.styles,
         isProd: config.isProd,
-        outDir: config.outDir
+        outDir: config.outDir,
+        wwwRoot: config.wwwRoot
     });
 }
