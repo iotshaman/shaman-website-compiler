@@ -1,7 +1,7 @@
 {
   "name": "shaman-website-compiler",
   "version": "1.0.0",
-  "description": "",
+  "description": "Generate website scaffolding in seconds. Compile to output with the CLI or compile to Express JS routes with Node JS. Built with SEO in mind.",
   "main": "scripts/index.js",
   "scripts": {
     "start": "tsc && node scripts/index.js",
@@ -11,7 +11,7 @@
     "test-watch": "karma start",
     "test-travis": "./node_modules/.bin/karma start karma.travis.conf.js --single-run"
   },
-  "author": "",
+  "author": "Kyle Brown",
   "license": "ISC",
   "dependencies": {
     "clean-css": "^4.1.9",
