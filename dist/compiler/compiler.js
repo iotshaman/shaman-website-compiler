@@ -5,6 +5,7 @@ var template_engine_1 = require("../template-engine/template-engine");
 var javascript_engine_1 = require("../javascript-engine/javascript-engine");
 var css_engine_1 = require("../css-engine/css-engine");
 var Promise = require("promise");
+var nodePath = require("path");
 function ShamanWebsiteCompiler(config) {
     return {
         compile: function (express) { return compileWebsite(config, express); }
@@ -12,15 +13,21 @@ function ShamanWebsiteCompiler(config) {
 }
 exports.ShamanWebsiteCompiler = ShamanWebsiteCompiler;
 function compileWebsite(config, express) {
+    if (!config.outDir && !express) {
+        var e = "Shaman compiler: Please specify 'outDir' or pass an express server as an input parameter";
+        throw new Error(e);
+    }
     return loadFileDataFromGlobs(config).then(function (globMap) {
         return loadCompilerEngines(config, globMap);
     }).then(function (engines) {
         return compiler_engine_1.CompilerEngine(engines);
     }).then(function (compilerEngine) {
-        if (!express) {
-            return compilerEngine.generateFileOutput();
+        if (!!express) {
+            return compilerEngine.generateExpressRoutes(express);
         }
-        return compilerEngine.generateExpressRoutes(express);
+        return compilerEngine.generateFileOutput().then(function (files) {
+            return writeFilesToOutputDir(config, files);
+        });
     });
 }
 exports.compileWebsite = compileWebsite;
@@ -83,4 +90,14 @@ function loadCompilerEngines(config, globMap) {
     return engines;
 }
 exports.loadCompilerEngines = loadCompilerEngines;
+// GENERATE NEW FILES IN OUTPUT DIRECTORY
+function writeFilesToOutputDir(config, files) {
+    var operations = files.map(function (file) {
+        return config.fsx.outputFile(nodePath.join(config.outDir, file.name), file.contents);
+    });
+    return Promise.all(operations).then(function () {
+        return;
+    });
+}
+exports.writeFilesToOutputDir = writeFilesToOutputDir;
 //# sourceMappingURL=compiler.js.map

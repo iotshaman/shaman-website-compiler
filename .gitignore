@@ -11,3 +11,5 @@ dist/**/*.spec.js.map
 coverage/
 coverage/*
 scripts/debug.js
+sample/dist
+sample/dist/*

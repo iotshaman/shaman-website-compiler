@@ -5,6 +5,7 @@ import { TemplateEngine } from '../template-engine/template-engine';
 import { JavascriptEngine } from '../javascript-engine/javascript-engine';
 import { CssEngine } from '../css-engine/css-engine';
 import * as Promise from 'promise';
+import * as nodePath from 'path';
 
 export function ShamanWebsiteCompiler(config: CompilerConfig) {
     return {
@@ -13,15 +14,21 @@ export function ShamanWebsiteCompiler(config: CompilerConfig) {
 }
 
 export function compileWebsite(config: CompilerConfig, express?: any) {
+    if (!config.outDir && !express) {
+        var e = "Shaman compiler: Please specify 'outDir' or pass an express server as an input parameter";
+        throw new Error(e);
+    }
     return loadFileDataFromGlobs(config).then((globMap: GlobMap) => {
         return loadCompilerEngines(config, globMap);  
     }).then((engines: CompilerEngineList) => {
         return CompilerEngine(engines);
-    }).then((compilerEngine: CompilerEngineApi): Promise<void | FileContents[]> => {
-        if (!express) {
-            return compilerEngine.generateFileOutput();
-        }
-        return compilerEngine.generateExpressRoutes(express);
+    }).then((compilerEngine: CompilerEngineApi): Promise<void> => {
+        if (!!express) {
+            return compilerEngine.generateExpressRoutes(express);
+        }        
+        return compilerEngine.generateFileOutput().then((files: FileContents[]) => {
+            return writeFilesToOutputDir(config, files);
+        })
     });
 }
 
@@ -97,4 +104,14 @@ export interface CompilerEngineList {
     templateEngine: CompilerEngineApi;
     javascriptEngine: CompilerEngineApi;
     cssEngine: CompilerEngineApi;
+}
+
+// GENERATE NEW FILES IN OUTPUT DIRECTORY
+export function writeFilesToOutputDir(config: CompilerConfig, files: FileContents[]) {
+    let operations: Promise<void>[] = files.map((file: FileContents) => {
+        return config.fsx.outputFile(nodePath.join(config.outDir, file.name), file.contents);
+    });
+    return Promise.all(operations).then(() => { 
+        return; 
+    });
 }
