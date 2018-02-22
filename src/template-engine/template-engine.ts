@@ -36,6 +36,9 @@ function mapExpressRoutes(templates: FileContents[], mimeType: string, wwwRoot?:
             res.write(templates[i].contents);
             return res.end();
         }
+        if (name == 'index.html' || name == 'Index.html') {
+            map['/'] = map[`/${name}`];
+        }
     }
     return map;
 }
