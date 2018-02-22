@@ -47,7 +47,13 @@ export function loadFileDataFromGlobs(config: CompilerConfig): Promise<GlobMap> 
 
 export function loadGlobData(glob: any, name: string, pattern: string[]): Promise<GlobResult> {
     return glob(pattern).then((files: string[]) => {
-        return { name: name, files: files }
+        return { name: name, files: sortFiles(files) }
+    });
+}
+
+export function sortFiles(globs: string[]) {
+    return globs.sort((a: string, b: string) => {
+        return a.toUpperCase().localeCompare(b.toUpperCase());
     });
 }
 

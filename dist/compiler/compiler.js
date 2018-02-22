@@ -46,10 +46,16 @@ function loadFileDataFromGlobs(config) {
 exports.loadFileDataFromGlobs = loadFileDataFromGlobs;
 function loadGlobData(glob, name, pattern) {
     return glob(pattern).then(function (files) {
-        return { name: name, files: files };
+        return { name: name, files: sortFiles(files) };
     });
 }
 exports.loadGlobData = loadGlobData;
+function sortFiles(globs) {
+    return globs.sort(function (a, b) {
+        return a.toUpperCase().localeCompare(b.toUpperCase());
+    });
+}
+exports.sortFiles = sortFiles;
 function mapGlobData(globs) {
     var map = {};
     for (var i = 0; i < globs.length; i++) {
