@@ -9,7 +9,7 @@ var tags = [
     openGraph('og:url', 'og_url'),
     openGraph('og:image', 'og_image'),
     twitterCardTag(),
-    twitterTag('twitter:site', 'twitter_user'),
+    twitterTag('twitter:site', '$.defaults.twitter_user'),
     twitterTag('twitter:title', 'title'),
     twitterTag('twitter:description', 'description'),
     googlePublisherTag()
@@ -40,11 +40,11 @@ function openGraph(prop, val) {
 }
 function twitterCardTag() {
     var condition = "{{#if twitter_type}}{{ twitter_type }}{{else}}summary{{/if}}";
-    return truthy('twitter_user', "<meta name=\"twitter:card\" content=\"" + condition + "\">\r\n");
+    return truthy('$.defaults.twitter_user', "<meta name=\"twitter:card\" content=\"" + condition + "\">\r\n");
 }
 function twitterTag(prop, val) {
     var newProp = "<meta name=\"" + prop + "\" content=\"{{" + val + "}}\">\r\n";
-    return truthy('twitter_user', truthy(val, newProp));
+    return truthy('$.defaults.twitter_user', truthy(val, newProp));
 }
 function googlePublisherTag() {
     var newProp = "<link rel=\"publisher\" href=\"{{ google_address }}\">\r\n";

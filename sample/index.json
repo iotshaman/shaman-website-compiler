@@ -3,6 +3,5 @@
     "description": "Sample Description",
     "og_type": "Open Graph Type",
     "og_url": "Open Graph Url",
-    "og_image": "Open Graph Image",
-    "twitter_user": "iotshaman"
+    "og_image": "Open Graph Image"
 }
