@@ -8,6 +8,7 @@ export class WebsiteConfig {
     isProd?: boolean;
     outDir?: string;
     wwwRoot?: string;
+    noHtmlSuffix?: boolean;
 }
 
 export interface WebpageDefaults {
