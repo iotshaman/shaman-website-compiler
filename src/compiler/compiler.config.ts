@@ -15,5 +15,6 @@ export class CompilerConfig {
     styles?: string[];
     isProd?: boolean;
     outDir?: string;
-    wwwRoot: string;
+    wwwRoot?: string;
+    noHtmlSuffix?: boolean;
 }

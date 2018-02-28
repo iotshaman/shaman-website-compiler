@@ -10,7 +10,7 @@ function TemplateEngine(config) {
 exports.TemplateEngine = TemplateEngine;
 function generateExpressRoutes(config, express) {
     return template_engine_html_1.HtmlTemplateEngine(config).then(function (templates) {
-        return mapExpressRoutes(templates, 'text/html', config.wwwRoot);
+        return mapExpressRoutes(templates, config.wwwRoot, config.noHtmlSuffix);
     }).then(function (map) {
         express.all('*', function (req, res, next) {
             if (req.method == "GET" && !!map[req.url]) {
@@ -23,16 +23,19 @@ function generateExpressRoutes(config, express) {
         return;
     });
 }
-function mapExpressRoutes(templates, mimeType, wwwRoot) {
+function mapExpressRoutes(templates, wwwRoot, noHtmlSuffix) {
     var map = {};
     var _loop_1 = function (i) {
         var name_1 = wwwRoot ? templates[i].name.replace(wwwRoot, '') : templates[i].name;
+        if (!!noHtmlSuffix) {
+            name_1 = name_1.replace('.html', '');
+        }
         map["/" + name_1] = function (req, res, next) {
-            res.writeHead(200, { 'Content-Type': mimeType });
+            res.writeHead(200, { 'Content-Type': 'text/html' });
             res.write(templates[i].contents);
             return res.end();
         };
-        if (name_1 == 'index.html' || name_1 == 'Index.html') {
+        if (name_1.toLocaleLowerCase() == 'index.html' || (!!noHtmlSuffix && name_1.toLowerCase() == 'index')) {
             map['/'] = map["/" + name_1];
         }
     };

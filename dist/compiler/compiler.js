@@ -77,7 +77,8 @@ function loadCompilerEngines(config, globMap) {
             styles: !globMap['styles'] ? [] : globMap['styles'],
             scripts: !globMap['scripts'] ? [] : globMap['scripts'],
             isProd: config.isProd,
-            wwwRoot: config.wwwRoot
+            wwwRoot: config.wwwRoot,
+            noHtmlSuffix: config.noHtmlSuffix
         }),
         javascriptEngine: javascript_engine_1.JavascriptEngine({
             fsx: config.fsx,

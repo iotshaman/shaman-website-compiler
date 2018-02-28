@@ -12,4 +12,5 @@ export class TemplateEngineConfig {
     styles?: string[];
     isProd?: boolean;
     wwwRoot?: string;
+    noHtmlSuffix?: boolean;
 }

@@ -14,7 +14,7 @@ export function TemplateEngine(config: TemplateEngineConfig): CompilerEngineApi 
 
 function generateExpressRoutes(config: TemplateEngineConfig, express: any) {
     return HtmlTemplateEngine(config).then((templates: FileContents[]) => {
-        return mapExpressRoutes(templates, 'text/html', config.wwwRoot);
+        return mapExpressRoutes(templates, config.wwwRoot, config.noHtmlSuffix);
     }).then((map: any) => {
         express.all('*', function(req, res, next) {
             if (req.method == "GET" && !!map[req.url]) {
@@ -27,16 +27,17 @@ function generateExpressRoutes(config: TemplateEngineConfig, express: any) {
     });
 }
 
-function mapExpressRoutes(templates: FileContents[], mimeType: string, wwwRoot?: string) {
+function mapExpressRoutes(templates: FileContents[], wwwRoot?: string, noHtmlSuffix?: boolean) {
     var map = {};
     for (let i = 0; i < templates.length; i++) {
         let name = wwwRoot ? templates[i].name.replace(wwwRoot, '') : templates[i].name;
+        if (!!noHtmlSuffix) { name = name.replace('.html', ''); }
         map[`/${name}`] = (req, res, next) => {
-            res.writeHead(200, {'Content-Type': mimeType});
+            res.writeHead(200, {'Content-Type': 'text/html'});
             res.write(templates[i].contents);
             return res.end();
         }
-        if (name == 'index.html' || name == 'Index.html') {
+        if (name.toLocaleLowerCase() == 'index.html' || (!!noHtmlSuffix && name.toLowerCase() == 'index')) {
             map['/'] = map[`/${name}`];
         }
     }
