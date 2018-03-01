@@ -2,12 +2,13 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var glob_factory_1 = require("../glob-factory/glob.factory");
 var compiler_1 = require("./compiler");
+var template_engine_factory_1 = require("../template-engine/template-engine.factory");
 function ShamanWebsiteCompilerFactory(config) {
     var glob = glob_factory_1.GlobFactory({ cwd: config.cwd });
     return compiler_1.ShamanWebsiteCompiler({
         glob: glob,
         fsx: require('fs-extra'),
-        handlebars: require('handlebars'),
+        handlebars: template_engine_factory_1.registerHandlebarsHelpers(require('handlebars')),
         minify: require('uglify-es').minify,
         minifyCss: require('clean-css'),
         gaze: require('gaze'),

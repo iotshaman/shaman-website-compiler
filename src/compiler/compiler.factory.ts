@@ -1,6 +1,7 @@
 import { WebsiteConfig } from '../config/website.config';
 import { GlobFactory } from '../glob-factory/glob.factory';
 import { ShamanWebsiteCompiler } from './compiler';
+import { registerHandlebarsHelpers } from '../template-engine/template-engine.factory';
 import * as Promise from 'promise';
 
 export function ShamanWebsiteCompilerFactory(config: WebsiteConfig) {
@@ -8,7 +9,7 @@ export function ShamanWebsiteCompilerFactory(config: WebsiteConfig) {
     return ShamanWebsiteCompiler({ 
         glob: glob, 
         fsx: require('fs-extra'),
-        handlebars: require('handlebars'),
+        handlebars: registerHandlebarsHelpers(require('handlebars')),
         minify: require('uglify-es').minify,
         minifyCss: require('clean-css'),
         gaze: require('gaze'),

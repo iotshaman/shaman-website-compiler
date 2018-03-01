@@ -5,9 +5,11 @@ import * as Promise from 'promise';
 
 export function TemplateEngineFactory(config: WebsiteConfig) {
     var glob = GlobFactory({ cwd: config.cwd });
+    var handlebars = require('handlebars');
+    registerHandlebarsHelpers(handlebars);
     return TemplateEngine({ 
         fsx: require('fs-extra'),        
-        handlebars: require('handlebars'),
+        handlebars: handlebars,
         cwd: config.cwd,
         defaults: config.defaults,
         pages: config.pages,
@@ -16,4 +18,11 @@ export function TemplateEngineFactory(config: WebsiteConfig) {
         scripts: config.scripts,
         wwwRoot: config.wwwRoot
     });
+}
+
+export function registerHandlebarsHelpers(handlebars) {
+    handlebars.registerHelper('raw-block', function(options) {
+        return options.fn(this);
+    });
+    return handlebars;
 }

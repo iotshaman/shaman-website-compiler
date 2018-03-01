@@ -146,9 +146,7 @@ function watchFiles(config, callback) {
             config.gaze(globs, function (ex, watcher) {
                 if (ex)
                     return err(ex);
-                this.on('changed', function (filepath) {
-                    callback();
-                });
+                this.on('changed', function () { callback(); });
                 return res();
             });
         });
