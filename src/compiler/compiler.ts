@@ -25,8 +25,8 @@ export function compileWebsite(config: CompilerConfig, express?: any) {
         return CompilerEngine(engines);
     }).then((compilerEngine: CompilerEngineApi): Promise<void> => {
         if (!!express) {
-            return generateExpressRoutes(config, compilerEngine, express).then(function(routes) {
-                express.all('*', routes);
+            return generateExpressRoutes(config, compilerEngine, express).then(function() {
+                express.all('*', primaryExpressRoute);
                 return;
             });
         }        
@@ -133,6 +133,7 @@ let watching: boolean = false;
 export function generateExpressRoutes(config: CompilerConfig, compilerEngine: CompilerEngineApi, express: any) {
     return new Promise(function(res, err) {
         compilerEngine.generateExpressRoutes().then(function(map) {
+            expressMap = map;
             if (!!config.autoWatch && !watching) {
                 watching = true;
                 watchFiles(config, function() {
@@ -140,21 +141,18 @@ export function generateExpressRoutes(config: CompilerConfig, compilerEngine: Co
                     generateExpressRoutes(config, compilerEngine, express);
                 });
             }
-            return res(generateExpressMap(express, map));
+            return res();
         });
     })
 }
 
-let expressMap = function(req, res, next) { next('Not Implemented'); }
-export function generateExpressMap(express: any, map: any) {
-    expressMap = function(req, res, next) {
-        if (req.method == "GET" && !!map[req.url]) {
-            map[req.url](req, res, next);
-        } else {
-            next();
-        }
+let expressMap = {};
+let primaryExpressRoute = function(req, res, next) {
+    if (req.method == "GET" && !!expressMap[req.url]) {
+        expressMap[req.url](req, res, next);
+    } else {
+        next();
     }
-    return expressMap;
 }
 
 // WATCH FILES

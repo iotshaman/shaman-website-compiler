@@ -23,8 +23,8 @@ function compileWebsite(config, express) {
         return compiler_engine_1.CompilerEngine(engines);
     }).then(function (compilerEngine) {
         if (!!express) {
-            return generateExpressRoutes(config, compilerEngine, express).then(function (routes) {
-                express.all('*', routes);
+            return generateExpressRoutes(config, compilerEngine, express).then(function () {
+                express.all('*', primaryExpressRoute);
                 return;
             });
         }
@@ -116,6 +116,7 @@ var watching = false;
 function generateExpressRoutes(config, compilerEngine, express) {
     return new Promise(function (res, err) {
         compilerEngine.generateExpressRoutes().then(function (map) {
+            expressMap = map;
             if (!!config.autoWatch && !watching) {
                 watching = true;
                 watchFiles(config, function () {
@@ -123,24 +124,20 @@ function generateExpressRoutes(config, compilerEngine, express) {
                     generateExpressRoutes(config, compilerEngine, express);
                 });
             }
-            return res(generateExpressMap(express, map));
+            return res();
         });
     });
 }
 exports.generateExpressRoutes = generateExpressRoutes;
-var expressMap = function (req, res, next) { next('Not Implemented'); };
-function generateExpressMap(express, map) {
-    expressMap = function (req, res, next) {
-        if (req.method == "GET" && !!map[req.url]) {
-            map[req.url](req, res, next);
-        }
-        else {
-            next();
-        }
-    };
-    return expressMap;
-}
-exports.generateExpressMap = generateExpressMap;
+var expressMap = {};
+var primaryExpressRoute = function (req, res, next) {
+    if (req.method == "GET" && !!expressMap[req.url]) {
+        expressMap[req.url](req, res, next);
+    }
+    else {
+        next();
+    }
+};
 // WATCH FILES
 function watchFiles(config, callback) {
     return new Promise(function (res, err) {
