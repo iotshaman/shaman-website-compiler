@@ -121,6 +121,7 @@ function generateExpressRoutes(config, compilerEngine, express) {
                 watching = true;
                 watchFiles(config, function () {
                     console.log('Updating express routes...');
+                    lastModified = new Date();
                     generateExpressRoutes(config, compilerEngine, express);
                 });
             }
@@ -130,8 +131,15 @@ function generateExpressRoutes(config, compilerEngine, express) {
 }
 exports.generateExpressRoutes = generateExpressRoutes;
 var expressMap = {};
+var lastModified = new Date();
 var primaryExpressRoute = function (req, res, next) {
     if (req.method == "GET" && !!expressMap[req.url]) {
+        if (!!req.headers['if-modified-since']) {
+            if (lastModified > new Date(req.headers['if-modified-since'])) {
+                res.status(304).send('Not Modified');
+            }
+            res.header('Last-Modified', lastModified);
+        }
         expressMap[req.url](req, res, next);
     }
     else {
