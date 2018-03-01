@@ -137,6 +137,7 @@ var primaryExpressRoute = function (req, res, next) {
         if (!!req.headers['if-modified-since']) {
             if (lastModified > new Date(req.headers['if-modified-since'])) {
                 res.status(304).send('Not Modified');
+                return;
             }
             res.header('Last-Modified', lastModified.toUTCString());
         }
