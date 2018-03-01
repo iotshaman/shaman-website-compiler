@@ -131,7 +131,7 @@ function generateExpressRoutes(config, compilerEngine, express) {
 }
 exports.generateExpressRoutes = generateExpressRoutes;
 var expressMap = {};
-var lastModified = new Date();
+var lastModified = new Date((new Date()).toUTCString()); //floor the milliseconds
 var primaryExpressRoute = function (req, res, next) {
     if (req.method == "GET" && !!expressMap[req.url]) {
         if (!!req.headers['if-modified-since']) {
