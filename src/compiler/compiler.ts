@@ -152,12 +152,12 @@ let lastModified: Date = new Date()
 let primaryExpressRoute = function(req, res, next) {
     if (req.method == "GET" && !!expressMap[req.url]) {
         if (!!req.headers['if-modified-since']) {
-            if (lastModified > new Date(req.headers['if-modified-since'])) {
+            if (lastModified <= new Date(req.headers['if-modified-since'])) {
                 res.status(304).send('Not Modified');
                 return;
             }
-            res.header('Last-Modified', lastModified.toUTCString());
         }
+        res.header('Last-Modified', lastModified.toUTCString());
         expressMap[req.url](req, res, next);
     } else {
         next();
