@@ -23,6 +23,30 @@ function registerHandlebarsHelpers(handlebars) {
     handlebars.registerHelper('raw-block', function (options) {
         return options.fn(this);
     });
+    handlebars.registerHelper('equals', function (item1, item2, options) {
+        if (item1 == item2) {
+            return options.fn(this);
+        }
+        else {
+            return options.inverse(this);
+        }
+    });
+    handlebars.registerHelper('isNullOrEmpty', function (item, options) {
+        if (!item) {
+            return options.fn(this);
+        }
+        else {
+            return options.inverse(this);
+        }
+    });
+    handlebars.registerHelper('isNotNullOrEmpty', function (item, options) {
+        if (!!item) {
+            return options.fn(this);
+        }
+        else {
+            return options.inverse(this);
+        }
+    });
     return handlebars;
 }
 exports.registerHandlebarsHelpers = registerHandlebarsHelpers;
