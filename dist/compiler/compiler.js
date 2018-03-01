@@ -119,6 +119,7 @@ function generateExpressRoutes(config, compilerEngine, express) {
             if (!!config.autoWatch && !watching) {
                 watching = true;
                 watchFiles(config, function () {
+                    console.log('Updating express routes...');
                     generateExpressRoutes(config, compilerEngine, express);
                 });
             }
