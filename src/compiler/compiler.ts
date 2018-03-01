@@ -138,7 +138,7 @@ export function generateExpressRoutes(config: CompilerConfig, compilerEngine: Co
                 watching = true;
                 watchFiles(config, function() {
                     console.log('Updating express routes...');
-                    lastModified = new Date();
+                    lastModified = new Date((new Date()).toUTCString());
                     generateExpressRoutes(config, compilerEngine, express);
                 });
             }
@@ -148,7 +148,7 @@ export function generateExpressRoutes(config: CompilerConfig, compilerEngine: Co
 }
 
 let expressMap = {};
-let lastModified: Date = new Date((new Date()).toUTCString()) //floor the milliseconds
+let lastModified: Date = new Date((new Date()).toUTCString());
 let primaryExpressRoute = function(req, res, next) {
     if (req.method == "GET" && !!expressMap[req.url]) {
         if (!!req.headers['if-modified-since']) {
