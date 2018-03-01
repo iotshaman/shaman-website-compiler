@@ -157,13 +157,30 @@ let primaryExpressRoute = function(req, res, next) {
 
 // WATCH FILES
 export function watchFiles(config: CompilerConfig, callback: () => void) {
-    return new Promise(function(res, err) {
-        config.gaze(config.pages, function(ex, watcher) {
-            if (ex) return err(ex); 
-            this.on('changed', function(filepath) {
-                callback();
+    return new Promise((res, err) => {
+        loadFileDataFromGlobs(config).then((globMap: GlobMap) => {
+            var globs = getWatchFileList(config.cwd, globMap);
+            config.gaze(globs, function(ex, watcher) {
+                if (ex) return err(ex); 
+                this.on('changed', () => { callback(); });
+                return res();
             });
-            return res();
-        });
+        })
     });
+}
+
+export function getWatchFileList(cwd: string, globMap: GlobMap) {
+    var globs = globMap['pages'].map((val) => {
+        return nodePath.join(cwd, val);
+    });
+    globs = globs.concat(globMap['partials'].map((val) => {
+        return nodePath.join(cwd, val);
+    }));
+    globs = globs.concat(globMap['scripts'].map((val) => {
+        return nodePath.join(cwd, val);
+    }));
+    globs = globs.concat(globMap['styles'].map((val) => {
+        return nodePath.join(cwd, val);
+    }));
+    return globs;
 }
