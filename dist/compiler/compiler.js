@@ -138,7 +138,7 @@ var primaryExpressRoute = function (req, res, next) {
             if (lastModified > new Date(req.headers['if-modified-since'])) {
                 res.status(304).send('Not Modified');
             }
-            res.header('Last-Modified', lastModified);
+            res.header('Last-Modified', lastModified.toUTCString());
         }
         expressMap[req.url](req, res, next);
     }
