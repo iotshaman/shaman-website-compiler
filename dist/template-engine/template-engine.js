@@ -4,23 +4,13 @@ var template_engine_html_1 = require("./template-engine.html");
 function TemplateEngine(config) {
     return {
         generateFileOutput: function () { return template_engine_html_1.HtmlTemplateEngine(config); },
-        generateExpressRoutes: function (express) { return generateExpressRoutes(config, express); }
+        generateExpressRoutes: function () { return generateExpressRoutes(config); }
     };
 }
 exports.TemplateEngine = TemplateEngine;
-function generateExpressRoutes(config, express) {
+function generateExpressRoutes(config) {
     return template_engine_html_1.HtmlTemplateEngine(config).then(function (templates) {
         return mapExpressRoutes(templates, config.wwwRoot, config.noHtmlSuffix);
-    }).then(function (map) {
-        express.all('*', function (req, res, next) {
-            if (req.method == "GET" && !!map[req.url]) {
-                map[req.url](req, res, next);
-            }
-            else {
-                next();
-            }
-        });
-        return;
     });
 }
 function mapExpressRoutes(templates, wwwRoot, noHtmlSuffix) {

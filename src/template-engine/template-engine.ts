@@ -8,22 +8,13 @@ import * as Promise from 'promise';
 export function TemplateEngine(config: TemplateEngineConfig): CompilerEngineApi {
     return {
         generateFileOutput: () => { return HtmlTemplateEngine(config); },
-        generateExpressRoutes: (express) => { return generateExpressRoutes(config, express); }
+        generateExpressRoutes: () => { return generateExpressRoutes(config); }
     }
 }
 
-function generateExpressRoutes(config: TemplateEngineConfig, express: any) {
+function generateExpressRoutes(config: TemplateEngineConfig) {
     return HtmlTemplateEngine(config).then((templates: FileContents[]) => {
         return mapExpressRoutes(templates, config.wwwRoot, config.noHtmlSuffix);
-    }).then((map: any) => {
-        express.all('*', function(req, res, next) {
-            if (req.method == "GET" && !!map[req.url]) {
-                map[req.url](req, res, next);
-            } else {
-                next();
-            }
-        });
-        return;
     });
 }
 

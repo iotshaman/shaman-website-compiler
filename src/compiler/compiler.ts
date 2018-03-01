@@ -6,6 +6,7 @@ import { JavascriptEngine } from '../javascript-engine/javascript-engine';
 import { CssEngine } from '../css-engine/css-engine';
 import * as Promise from 'promise';
 import * as nodePath from 'path';
+import { watchFile } from 'fs-extra';
 
 export function ShamanWebsiteCompiler(config: CompilerConfig) {
     return {
@@ -24,7 +25,10 @@ export function compileWebsite(config: CompilerConfig, express?: any) {
         return CompilerEngine(engines);
     }).then((compilerEngine: CompilerEngineApi): Promise<void> => {
         if (!!express) {
-            return compilerEngine.generateExpressRoutes(express);
+            return generateExpressRoutes(config, compilerEngine, express).then(function(routes) {
+                express.all('*', routes);
+                return;
+            });
         }        
         return compilerEngine.generateFileOutput().then((files: FileContents[]) => {
             return writeFilesToOutputDir(config, files);
@@ -121,5 +125,46 @@ export function writeFilesToOutputDir(config: CompilerConfig, files: FileContent
     });
     return Promise.all(operations).then(() => { 
         return; 
+    });
+}
+
+// CREATE EXPRESS ROUTES
+let watching: boolean = false;
+export function generateExpressRoutes(config: CompilerConfig, compilerEngine: CompilerEngineApi, express: any) {
+    return new Promise(function(res, err) {
+        compilerEngine.generateExpressRoutes().then(function(map) {
+            if (!!config.autoWatch && !watching) {
+                watching = true;
+                watchFiles(config, function() {
+                    generateExpressRoutes(config, compilerEngine, express);
+                });
+            }
+            return res(generateExpressMap(express, map));
+        });
+    })
+}
+
+let expressMap = function(req, res, next) { next('Not Implemented'); }
+export function generateExpressMap(express: any, map: any) {
+    expressMap = function(req, res, next) {
+        if (req.method == "GET" && !!map[req.url]) {
+            map[req.url](req, res, next);
+        } else {
+            next();
+        }
+    }
+    return expressMap;
+}
+
+// WATCH FILES
+export function watchFiles(config: CompilerConfig, callback: () => void) {
+    return new Promise(function(res, err) {
+        config.gaze(config.pages, function(ex, watcher) {
+            if (ex) return err(ex); 
+            this.on('changed', function(filepath) {
+                callback();
+            });
+            return res();
+        });
     });
 }

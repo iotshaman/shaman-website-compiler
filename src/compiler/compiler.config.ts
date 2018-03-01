@@ -7,6 +7,7 @@ export class CompilerConfig {
     handlebars: any;
     minify: (contents: string) => any;
     minifyCss: (contents: string) => any;
+    gaze: (pattern: string | string[], callback: any) => void;
     cwd: string;
     partials: string[];
     pages: string[];
@@ -17,4 +18,5 @@ export class CompilerConfig {
     outDir?: string;
     wwwRoot?: string;
     noHtmlSuffix?: boolean;
+    autoWatch?: boolean;
 }

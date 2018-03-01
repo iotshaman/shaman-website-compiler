@@ -7,7 +7,7 @@ import * as Promise from 'promise';
 export function JavascriptEngine(config: JavascriptEngineConfig): CompilerEngineApi {
     return {
         generateFileOutput: () => { return generateJavascriptFiles(config); },
-        generateExpressRoutes: (express) => { return generateExpressRoutes(config, express); }
+        generateExpressRoutes: () => { return generateExpressRoutes(config); }
     }
 }
 
@@ -63,18 +63,9 @@ export function getJavascriptFileMap(files: FileContents[]) {
     return map;
 }
 
-function generateExpressRoutes(config: JavascriptEngineConfig, express: any) {
+function generateExpressRoutes(config: JavascriptEngineConfig) {
     return generateJavascriptFiles(config).then((templates: FileContents[]) => {
         return mapExpressRoutes(templates, 'text/javascript');
-    }).then((map: any) => {
-        express.all('*', function(req, res, next) {
-            if (req.method == "GET" && !!map[req.url]) {
-                map[req.url](req, res, next);
-            } else {
-                next();
-            }
-        });
-        return;
     });
 }
 

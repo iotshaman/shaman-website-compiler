@@ -5,7 +5,7 @@ var Promise = require("promise");
 function JavascriptEngine(config) {
     return {
         generateFileOutput: function () { return generateJavascriptFiles(config); },
-        generateExpressRoutes: function (express) { return generateExpressRoutes(config, express); }
+        generateExpressRoutes: function () { return generateExpressRoutes(config); }
     };
 }
 exports.JavascriptEngine = JavascriptEngine;
@@ -63,19 +63,9 @@ function getJavascriptFileMap(files) {
     return map;
 }
 exports.getJavascriptFileMap = getJavascriptFileMap;
-function generateExpressRoutes(config, express) {
+function generateExpressRoutes(config) {
     return generateJavascriptFiles(config).then(function (templates) {
         return mapExpressRoutes(templates, 'text/javascript');
-    }).then(function (map) {
-        express.all('*', function (req, res, next) {
-            if (req.method == "GET" && !!map[req.url]) {
-                map[req.url](req, res, next);
-            }
-            else {
-                next();
-            }
-        });
-        return;
     });
 }
 function mapExpressRoutes(templates, mimeType) {

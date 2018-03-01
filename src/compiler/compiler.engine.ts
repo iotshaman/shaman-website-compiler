@@ -4,13 +4,13 @@ import * as Promise from 'promise';
 
 export interface CompilerEngineApi {
     generateFileOutput: () => Promise<FileContents[]>;
-    generateExpressRoutes: (express: any) => Promise<void>;
+    generateExpressRoutes: () => Promise<any>;
 }
 
 export function CompilerEngine(engines: CompilerEngineList): CompilerEngineApi {
     return {
         generateFileOutput: () => { return generateAllFiles(engines); },
-        generateExpressRoutes: (express) => { return generateAllExpressRoutes(engines, express); }
+        generateExpressRoutes: () => { return generateAllExpressRoutes(engines); }
     }
 }
 
@@ -24,10 +24,18 @@ export function generateAllFiles(engines: CompilerEngineList) {
     });
 }
 
-export function generateAllExpressRoutes(engines: CompilerEngineList, express: any) {
+export function generateAllExpressRoutes(engines: CompilerEngineList) {
     return Promise.all([
-        engines.templateEngine.generateExpressRoutes(express),
-        engines.javascriptEngine.generateExpressRoutes(express),
-        engines.cssEngine.generateExpressRoutes(express)
-    ]).then(() => { return; });
+        engines.templateEngine.generateExpressRoutes(),
+        engines.javascriptEngine.generateExpressRoutes(),
+        engines.cssEngine.generateExpressRoutes()
+    ]).then((maps: any[]) => { 
+        return maps.reduce(function(a, b) {
+            let keys = Object.keys(b);
+            for (var i = 0; i < keys.length; i++) {
+                a[keys[i]] = b[keys[i]];
+            }
+            return a;
+        }, {});
+    });
 }

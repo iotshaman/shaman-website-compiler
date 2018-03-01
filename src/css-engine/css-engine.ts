@@ -7,7 +7,7 @@ import * as Promise from 'promise';
 export function CssEngine(config: CssEngineConfig): CompilerEngineApi {
     return {
         generateFileOutput: () => { return generateCssFiles(config); },
-        generateExpressRoutes: (express) => { return generateExpressRoutes(config, express); }
+        generateExpressRoutes: () => { return generateExpressRoutes(config); }
     }
 }
 
@@ -52,18 +52,9 @@ export function reduceCssFiles(files: FileContents[]) {
     }, '');
 }
 
-function generateExpressRoutes(config: CssEngineConfig, express: any) {
+function generateExpressRoutes(config: CssEngineConfig) {
     return generateCssFiles(config).then((templates: FileContents[]) => {
         return mapExpressRoutes(templates, 'text/css');
-    }).then((map: any) => {
-        express.all('*', function(req, res, next) {
-            if (req.method == "GET" && !!map[req.url]) {
-                map[req.url](req, res, next);
-            } else {
-                next();
-            }
-        });
-        return;
     });
 }
 

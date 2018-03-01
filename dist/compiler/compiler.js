@@ -23,7 +23,10 @@ function compileWebsite(config, express) {
         return compiler_engine_1.CompilerEngine(engines);
     }).then(function (compilerEngine) {
         if (!!express) {
-            return compilerEngine.generateExpressRoutes(express);
+            return generateExpressRoutes(config, compilerEngine, express).then(function (routes) {
+                express.all('*', routes);
+                return;
+            });
         }
         return compilerEngine.generateFileOutput().then(function (files) {
             return writeFilesToOutputDir(config, files);
@@ -108,4 +111,47 @@ function writeFilesToOutputDir(config, files) {
     });
 }
 exports.writeFilesToOutputDir = writeFilesToOutputDir;
+// CREATE EXPRESS ROUTES
+var watching = false;
+function generateExpressRoutes(config, compilerEngine, express) {
+    return new Promise(function (res, err) {
+        compilerEngine.generateExpressRoutes().then(function (map) {
+            if (!!config.autoWatch && !watching) {
+                watching = true;
+                watchFiles(config, function () {
+                    generateExpressRoutes(config, compilerEngine, express);
+                });
+            }
+            return res(generateExpressMap(express, map));
+        });
+    });
+}
+exports.generateExpressRoutes = generateExpressRoutes;
+var expressMap = function (req, res, next) { next('Not Implemented'); };
+function generateExpressMap(express, map) {
+    expressMap = function (req, res, next) {
+        if (req.method == "GET" && !!map[req.url]) {
+            map[req.url](req, res, next);
+        }
+        else {
+            next();
+        }
+    };
+    return expressMap;
+}
+exports.generateExpressMap = generateExpressMap;
+// WATCH FILES
+function watchFiles(config, callback) {
+    return new Promise(function (res, err) {
+        config.gaze(config.pages, function (ex, watcher) {
+            if (ex)
+                return err(ex);
+            this.on('changed', function (filepath) {
+                callback();
+            });
+            return res();
+        });
+    });
+}
+exports.watchFiles = watchFiles;
 //# sourceMappingURL=compiler.js.map

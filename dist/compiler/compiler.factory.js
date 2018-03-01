@@ -10,6 +10,7 @@ function ShamanWebsiteCompilerFactory(config) {
         handlebars: require('handlebars'),
         minify: require('uglify-es').minify,
         minifyCss: require('clean-css'),
+        gaze: require('gaze'),
         cwd: config.cwd,
         partials: config.partials,
         pages: config.pages,
@@ -19,7 +20,8 @@ function ShamanWebsiteCompilerFactory(config) {
         isProd: config.isProd,
         outDir: config.outDir,
         wwwRoot: config.wwwRoot,
-        noHtmlSuffix: config.noHtmlSuffix
+        noHtmlSuffix: config.noHtmlSuffix,
+        autoWatch: config.autoWatch
     });
 }
 exports.ShamanWebsiteCompilerFactory = ShamanWebsiteCompilerFactory;

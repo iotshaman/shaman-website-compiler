@@ -9,6 +9,7 @@ export class WebsiteConfig {
     outDir?: string;
     wwwRoot?: string;
     noHtmlSuffix?: boolean;
+    autoWatch?: boolean;
 }
 
 export interface WebpageDefaults {
