@@ -3,13 +3,36 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var template_engine_html_1 = require("./template-engine.html");
 function TemplateEngine(config) {
     return {
-        generateFileOutput: function () { return template_engine_html_1.HtmlTemplateEngine(config); },
+        generateFileOutput: function () {
+            return template_engine_html_1.HtmlTemplateEngine(config).then(function (templates) {
+                if (!!config.transformData) {
+                    return transformTemplates(config, templates);
+                }
+                return templates;
+            });
+        },
         generateExpressRoutes: function () { return generateExpressRoutes(config); }
     };
 }
 exports.TemplateEngine = TemplateEngine;
+function transformTemplates(config, templates) {
+    return templates.map(function (template) {
+        var compile = config.handlebars.compile(template.contents);
+        var data = config.transformData(template.name);
+        var rslt = {
+            name: template.name,
+            contents: compile(!data ? {} : data)
+        };
+        return rslt;
+    });
+}
 function generateExpressRoutes(config) {
     return template_engine_html_1.HtmlTemplateEngine(config).then(function (templates) {
+        if (!!config.transformData) {
+            return transformTemplates(config, templates);
+        }
+        return templates;
+    }).then(function (templates) {
         return mapExpressRoutes(templates, config.wwwRoot, config.noHtmlSuffix);
     });
 }

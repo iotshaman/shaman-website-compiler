@@ -13,4 +13,5 @@ export class TemplateEngineConfig {
     isProd?: boolean;
     wwwRoot?: string;
     noHtmlSuffix?: boolean;
+    transformData?: (path: string) => any;
 }

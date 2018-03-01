@@ -19,4 +19,5 @@ export class CompilerConfig {
     wwwRoot?: string;
     noHtmlSuffix?: boolean;
     autoWatch?: boolean;
+    transformData?: (path: string) => any;
 }

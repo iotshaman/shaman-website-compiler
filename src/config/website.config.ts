@@ -10,6 +10,7 @@ export class WebsiteConfig {
     wwwRoot?: string;
     noHtmlSuffix?: boolean;
     autoWatch?: boolean;
+    transformData?: (path: string) => any;
 }
 
 export interface WebpageDefaults {

@@ -7,13 +7,36 @@ import * as Promise from 'promise';
 
 export function TemplateEngine(config: TemplateEngineConfig): CompilerEngineApi {
     return {
-        generateFileOutput: () => { return HtmlTemplateEngine(config); },
+        generateFileOutput: () => { 
+            return HtmlTemplateEngine(config).then((templates: FileContents[]) => {
+                if (!!config.transformData) {
+                    return transformTemplates(config, templates);
+                }
+                return templates;
+            }); 
+        },
         generateExpressRoutes: () => { return generateExpressRoutes(config); }
     }
 }
 
+function transformTemplates(config: TemplateEngineConfig, templates: FileContents[]) {
+    return templates.map((template: FileContents) => {
+        let compile = config.handlebars.compile(template.contents);
+        let data = config.transformData(template.name);
+        let rslt: FileContents = {
+            name: template.name,
+            contents: compile(!data ? {} : data)
+        }
+        return rslt;
+    });
+}
+
 function generateExpressRoutes(config: TemplateEngineConfig) {
     return HtmlTemplateEngine(config).then((templates: FileContents[]) => {
+        if (!!config.transformData) {
+            return transformTemplates(config, templates);
+        } return templates;
+    }).then((templates: FileContents[]) => {
         return mapExpressRoutes(templates, config.wwwRoot, config.noHtmlSuffix);
     });
 }

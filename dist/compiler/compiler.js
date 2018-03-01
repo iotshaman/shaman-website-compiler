@@ -81,7 +81,8 @@ function loadCompilerEngines(config, globMap) {
             scripts: !globMap['scripts'] ? [] : globMap['scripts'],
             isProd: config.isProd,
             wwwRoot: config.wwwRoot,
-            noHtmlSuffix: config.noHtmlSuffix
+            noHtmlSuffix: config.noHtmlSuffix,
+            transformData: config.transformData
         }),
         javascriptEngine: javascript_engine_1.JavascriptEngine({
             fsx: config.fsx,

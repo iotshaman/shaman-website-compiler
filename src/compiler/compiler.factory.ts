@@ -23,6 +23,7 @@ export function ShamanWebsiteCompilerFactory(config: WebsiteConfig) {
         outDir: config.outDir,
         wwwRoot: config.wwwRoot,
         noHtmlSuffix: config.noHtmlSuffix,
-        autoWatch: config.autoWatch
+        autoWatch: config.autoWatch,
+        transformData: config.transformData
     });
 }

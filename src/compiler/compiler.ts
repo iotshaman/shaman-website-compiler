@@ -92,7 +92,8 @@ export function loadCompilerEngines(config: CompilerConfig, globMap: GlobMap) {
             scripts: !globMap['scripts'] ? [] : globMap['scripts'],
             isProd: config.isProd,
             wwwRoot: config.wwwRoot,
-            noHtmlSuffix: config.noHtmlSuffix
+            noHtmlSuffix: config.noHtmlSuffix,
+            transformData: config.transformData
         }),
         javascriptEngine: JavascriptEngine({
             fsx: config.fsx,
