@@ -26,7 +26,7 @@ export function compileWebsite(config: CompilerConfig, express?: any) {
     }).then((compilerEngine: CompilerEngineApi): Promise<void> => {
         if (!!express) {
             return generateExpressRoutes(config, compilerEngine, express).then(function() {
-                express.all('*', primaryExpressRoute);
+                express.use('/', primaryExpressRoute);
                 return;
             });
         }        

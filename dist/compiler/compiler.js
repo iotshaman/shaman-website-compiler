@@ -24,7 +24,7 @@ function compileWebsite(config, express) {
     }).then(function (compilerEngine) {
         if (!!express) {
             return generateExpressRoutes(config, compilerEngine, express).then(function () {
-                express.all('*', primaryExpressRoute);
+                express.use('/', primaryExpressRoute);
                 return;
             });
         }
