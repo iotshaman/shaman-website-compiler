@@ -45,5 +45,11 @@ export function registerHandlebarsHelpers(handlebars) {
             return options.inverse(this);
         }
     });
+    handlebars.registerHelper('truncate', function(item: string, length, options) {
+        if (!item || !item.length) { return ''; }
+        let safeLength: number = parseInt(length, 10);
+        if (safeLength == NaN || item.length <= safeLength) { return item; }
+        return item.substring(0, safeLength);
+    });
     return handlebars;
 }
