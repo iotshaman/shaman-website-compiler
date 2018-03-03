@@ -23,7 +23,8 @@ function ShamanWebsiteCompilerFactory(config) {
         wwwRoot: config.wwwRoot,
         noHtmlSuffix: config.noHtmlSuffix,
         autoWatch: config.autoWatch,
-        transformData: config.transformData
+        transformData: config.transformData,
+        dynamicPages: config.dynamicPages
     });
 }
 exports.ShamanWebsiteCompilerFactory = ShamanWebsiteCompilerFactory;

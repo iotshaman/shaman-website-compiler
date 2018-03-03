@@ -24,6 +24,7 @@ export function ShamanWebsiteCompilerFactory(config: WebsiteConfig) {
         wwwRoot: config.wwwRoot,
         noHtmlSuffix: config.noHtmlSuffix,
         autoWatch: config.autoWatch,
-        transformData: config.transformData
+        transformData: config.transformData,
+        dynamicPages: config.dynamicPages
     });
 }

@@ -51,5 +51,13 @@ export function registerHandlebarsHelpers(handlebars) {
         if (safeLength == NaN || item.length <= safeLength) { return item; }
         return item.substring(0, safeLength);
     });
+    handlebars.registerHelper('filter', function(array: any[], prop: string, expect: string, options) {
+        var rslt = array.filter(function(val) {
+            return val[prop] == expect;
+        });
+        return rslt.map(function(val) {
+            return options.fn(val);
+        });
+    });
     return handlebars;
 }

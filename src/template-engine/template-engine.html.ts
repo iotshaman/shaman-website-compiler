@@ -1,4 +1,4 @@
-import { FileContents } from '../config/website.config';
+import { FileContents, DynamicPage } from '../config/website.config';
 import { TemplateEngineConfig } from './template-engine.config';
 import { GetMetaTagsTemplate } from './defaults/meta-tags';
 import { GetStylesTemplate } from './defaults/styles';
@@ -46,7 +46,9 @@ export function insertHandlebarsPartials(operations: Promise<void>[]) {
 // GENERATE TEMPALTE OBJECT
 export function generateTemplatesFromFiles(config: TemplateEngineConfig) {
     return getTemplateData(config).then((data) => {
-        return createTemplateObject(config, data);
+        return getDynamicTemplateData(config).then((dynamicData) => {
+            return createTemplateObject(config, data.concat(dynamicData));
+        });
     });
 }
 
@@ -63,6 +65,34 @@ export function getTemplateData(config: TemplateEngineConfig) {
         })
     });
     return Promise.all(operations);
+}
+
+export function getDynamicTemplateData(config: TemplateEngineConfig) {
+    let dynamics = config.dynamicPages ? config.dynamicPages : [];
+    let operations = dynamics.map((dynamic: DynamicPage) => {
+        return new Promise((res, err) => {
+            let path = nodePath.join(config.cwd, dynamic.template);
+            return config.fsx.readFile(path,  "utf8", (err: any, contents: string) => {
+                res({
+                    routes: dynamic.routes,
+                    contents: contents
+                })
+            });
+        });
+    });
+    return Promise.all(operations).then((dynamicTemplates: any[]) => {
+        let map = dynamicTemplates.map((dynamic) => {
+            return dynamic.routes.map((route) => {
+                return {
+                    file: route,
+                    contents: dynamic.contents
+                }
+            });
+        });
+        return map.reduce((a: any[], b: any[]) => {
+            return a.concat(b);
+        }, []);
+    })
 }
 
 export function createTemplateObject(config: TemplateEngineConfig, data: any[]): TemplateObject[] {

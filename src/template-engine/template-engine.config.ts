@@ -1,4 +1,4 @@
-import { WebsiteConfig, WebpageDefaults } from '../config/website.config';
+import { WebsiteConfig, WebpageDefaults, DynamicPage } from '../config/website.config';
 import * as Promise from 'promise';
 
 export class TemplateEngineConfig {
@@ -7,6 +7,7 @@ export class TemplateEngineConfig {
     cwd: string;
     defaults: WebpageDefaults;
     pages: string[];
+    dynamicPages?: DynamicPage[];
     partials?: string[];
     scripts?: string[];
     styles?: string[];

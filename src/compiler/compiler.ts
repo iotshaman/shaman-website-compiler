@@ -93,7 +93,8 @@ export function loadCompilerEngines(config: CompilerConfig, globMap: GlobMap) {
             isProd: config.isProd,
             wwwRoot: config.wwwRoot,
             noHtmlSuffix: config.noHtmlSuffix,
-            transformData: config.transformData
+            transformData: config.transformData,
+            dynamicPages: config.dynamicPages
         }),
         javascriptEngine: JavascriptEngine({
             fsx: config.fsx,

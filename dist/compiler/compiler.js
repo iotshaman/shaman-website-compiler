@@ -82,7 +82,8 @@ function loadCompilerEngines(config, globMap) {
             isProd: config.isProd,
             wwwRoot: config.wwwRoot,
             noHtmlSuffix: config.noHtmlSuffix,
-            transformData: config.transformData
+            transformData: config.transformData,
+            dynamicPages: config.dynamicPages
         }),
         javascriptEngine: javascript_engine_1.JavascriptEngine({
             fsx: config.fsx,

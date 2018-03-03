@@ -45,7 +45,9 @@ exports.insertHandlebarsPartials = insertHandlebarsPartials;
 // GENERATE TEMPALTE OBJECT
 function generateTemplatesFromFiles(config) {
     return getTemplateData(config).then(function (data) {
-        return createTemplateObject(config, data);
+        return getDynamicTemplateData(config).then(function (dynamicData) {
+            return createTemplateObject(config, data.concat(dynamicData));
+        });
     });
 }
 exports.generateTemplatesFromFiles = generateTemplatesFromFiles;
@@ -64,6 +66,34 @@ function getTemplateData(config) {
     return Promise.all(operations);
 }
 exports.getTemplateData = getTemplateData;
+function getDynamicTemplateData(config) {
+    var dynamics = config.dynamicPages ? config.dynamicPages : [];
+    var operations = dynamics.map(function (dynamic) {
+        return new Promise(function (res, err) {
+            var path = nodePath.join(config.cwd, dynamic.template);
+            return config.fsx.readFile(path, "utf8", function (err, contents) {
+                res({
+                    routes: dynamic.routes,
+                    contents: contents
+                });
+            });
+        });
+    });
+    return Promise.all(operations).then(function (dynamicTemplates) {
+        var map = dynamicTemplates.map(function (dynamic) {
+            return dynamic.routes.map(function (route) {
+                return {
+                    file: route,
+                    contents: dynamic.contents
+                };
+            });
+        });
+        return map.reduce(function (a, b) {
+            return a.concat(b);
+        }, []);
+    });
+}
+exports.getDynamicTemplateData = getDynamicTemplateData;
 function createTemplateObject(config, data) {
     var rslt = [];
     for (var i = 0; i < data.length; i++) {

@@ -2,6 +2,7 @@ export class WebsiteConfig {
     cwd: string;
     partials: string[];
     pages: string[];
+    dynamicPages?: DynamicPage[];
     defaults: WebpageDefaults;
     scripts?: string[];
     styles?: string[];
@@ -21,4 +22,9 @@ export interface WebpageDefaults {
 export interface FileContents {
     name: string;
     contents: string;
+}
+
+export interface DynamicPage {
+    template: string;
+    routes: string[];
 }
