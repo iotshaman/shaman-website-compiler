@@ -59,5 +59,30 @@ export function registerHandlebarsHelpers(handlebars) {
             return options.fn(val);
         });
     });
+    handlebars.registerHelper('share-link', function(type, root, route, desc, options) {
+        if (!type || !root || !route) { return ''; }
+        var rslt = '#';
+        var uriStart = encodeURI(`${root}${route}`);
+        var uriSuffix = encodeURI(desc ? desc : '');
+        switch (type) {
+            case 'twitter': {
+                rslt = `https://twitter.com/intent/tweet?url=${uriStart}&text=${uriSuffix}`;
+                break;
+            }
+            case 'facebook': {
+                rslt = `https://www.facebook.com/sharer/sharer.php?u=${uriStart}`;
+                break;
+            }
+            case 'google': {
+                rslt = `https://plus.google.com/share?url=${uriStart}`;
+                break;
+            }
+            case 'pinterest': {
+                rslt = `http://pinterest.com/pin/create/button/?url=${uriStart}&description=${uriSuffix}`
+                break;
+            }
+        }
+        return rslt;
+    });
     return handlebars;
 }
