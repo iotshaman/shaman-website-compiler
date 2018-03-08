@@ -19,12 +19,12 @@ export interface WebpageDefaults {
     description: string;
 }
 
-export interface FileContents {
-    name: string;
-    contents: string;
-}
-
 export interface DynamicPage {
     template: string;
     routes: string[];
+}
+
+export interface FileContents {
+    name: string;
+    contents: string;
 }
