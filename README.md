@@ -8,21 +8,21 @@ Since the compiler takes raw templates and raw data, then compiles them before t
 
 This project is inspired by projects like Webpack and Angular CLI, which provide similar tooling for the development of web "applications". Since those tools are mostly designed for data-intensive application development, I find them to be unnecessarily bulky for projects like small web "site" development. Shaman Website Compiler aims to provide the power of pre-compilation and file minification, while remaining MUCH smaller in size, and making decisions with web "site" development in mind. 
 
-### Requirements
+## Requirements
 
 In order to use this package in your web site project, you will need the following resource(s):
 
 - npm
 
-### Setting up your Workspace
+## Setting up your Workspace
 
 This project has a complimentary starter kit called [Ultimate Node Website](https://github.com/iotshaman/ultimate-node-website). I recommend downloading this project and using it as a starter kit the first time you use this plugin, as it will significantly reduce the amount of time it will take to familiarize yourself with the tools the compiler offers. The README file for [Ultimate Node Website](https://github.com/iotshaman/ultimate-node-website) has a "Quick Start" section that describes how to get it downloaded and running, please refer to this file to setup your workspace, then continue to the next section.
 
-### API
+## API
 
 Please refer to the following documentation to learn about the different features / options that are available. If you have any questions or need additional help, please go to [iotshman.com](https://www.iotshaman.com) and reach out to us using our social media options.
 
-#### Configuration
+### Configuration
 
 ```ts
 interface WebsiteConfig {
@@ -52,9 +52,9 @@ interface interface DynamicPage {
 }
 ```
 
-#### Compilation
+### Compilation
 
-To compile the application we want to pass the configuration variable (see above for specs) into the compiler factory. This will return on the compiler object, which has an iterface like:
+To compile the application we want to pass the configuration variable (see above for specs) into the compiler factory. This will return a compiler object, which has an iterface like:
 
 ```javascript
 interface ShamanWebsiteCompiler {
@@ -62,7 +62,7 @@ interface ShamanWebsiteCompiler {
 }
 ```
 
-The below sample of code show what it would look like to configure a small application with minimal features:
+The below sample of code shows what it would look like to configure a small application with minimal features:
 
 ```javascript
 var compilerFactory = require('shaman-website-compiler').ShamanWebsiteCompilerFactory;
@@ -82,22 +82,25 @@ var compiler = compilerFactory({
 	noHtmlSuffix: true,
 	autoWatch: !process.env.PROD_FLAG
 });
+
+var express = require('express');
+var app = express();
 compiler.compile(app).then(function() {
 	// ...
 });
 ```
 
-#### Template Engine
+### Template Engine
 
-Shaman Website Compiler has Handlebars templating built-in. Handlebars is a well-supported, time-tested templating engine based built for Javascript; it is very easy to learn and developers can jump right in and learn as they go. Please refer to their [homepage](https://handlebarsjs.com/) to learn more about how it works under the hood.
+Shaman Website Compiler has Handlebars templating built-in. Handlebars is a well-supported, time-tested templating engine designed specifically for Javascript; it is very easy to learn and developers can jump right in and learn as they go. Please refer to their [homepage](https://handlebarsjs.com/) to learn more about how it works under the hood.
 
 the compiler adds more tooling on top of the default Handlebars capabilities, making it even faster to get your new content developed. Below is a (working) list of the additional template features that are available:
 
-##### Data-injection
+#### Data-injection
 
-When the compiler has located all HTML files matching the pattern in the config variable "pages", it will look for files with the EXACT same paths that have the extension '.json' instead of '.html'. The compiler will then use the data in each of these files to inject into the corresponding '.html' template file. This allows users to definte templates that compile differently based on variables defined in JSON files.
+When the compiler has located all HTML files matching the pattern in the config variable "pages", it will look for files with the EXACT same paths that have the extension '.json' instead of '.html'. The compiler will then use the data in each of these files to inject into the corresponding '.html' template file. This allows users to define templates that compile differently based on variables defined in JSON files.
 
-##### Custom, auto-generated partials
+#### Custom, auto-generated partials
 
 In the starter kit mentioned in the above section 'Setting up your Workspace", the file 'views/index.html' has the following header element:
 
@@ -115,18 +118,21 @@ In the starter kit mentioned in the above section 'Setting up your Workspace", t
 
 You should notice the handlebars directives that start with the "$" symbol; these are custom partial files available to developers. These handlebars partials function just like regular handlebars partials and use the injected data (see above sections) to render the output.
 
-**{{ $.tags }}:** Adds SEO-specific meta-tags. In order for this tag to be effective, you will need to include data in each HTML file's corresponding JSON file (see above section "Data-injection"). The SEO tags will look for the following variables in your when compiling (if the variables aren't present it will simply skip over it):
+##### {{ $.tags }}
+Adds SEO-specific meta-tags. In order for this tag to be effective, you will need to include data in each HTML file's corresponding JSON file (see above section "Data-injection"). The SEO tags will look for the following variables in your when compiling (if the variables aren't present it will simply skip over it):
 
 - title - title, og_title, twitter_title meta tags
 - description - description / og_desc / twitter_desc meta tags
 - og_type - Open Graph Type (for search engines)
 - og_url - URL of the web page (for search engines)
 
-**{{ $.styles }}:** Automatically injects the CSS files that were found, based on the glob pattern provided in the config's "styles" property. These styles will be laoded in alphanumeric order, so if your styles need special order you can order them alphanumerically. When in production mode, these styles will bundled into 1 file and minified.
+##### { $.styles }}
+Automatically injects the CSS files that were found, based on the glob pattern provided in the config's "styles" property. These styles will be laoded in alphanumeric order, so if your styles need special order you can order them alphanumerically. When in production mode, these styles will bundled into 1 file and minified.
 
-**{{ $.scripts }}:** Automatically injects the javascript files that were found, based on the glob pattern provided in the config's "scripts" property. These scripts will be laoded in alphanumeric order, so if your scripts need special order you can order them alphanumerically. When in production mode, these scripts will bundled into 1 file and minified.
+##### {{ $.scripts }}
+Automatically injects the javascript files that were found, based on the glob pattern provided in the config's "scripts" property. These scripts will be laoded in alphanumeric order, so if your scripts need special order you can order them alphanumerically. When in production mode, these scripts will bundled into 1 file and minified.
 
-##### Auto compile / caching
+#### Auto compile / caching
 
 When you are running your application server locally you will notice that the command line says "updating express routes" whenever you change an HTML file. This allows you to start your server locally, begin making changes to the files, and be able to view those changes without having to restart the computer. This will only work for HTML files that already existed when the server was started, so if you add any new files you will still need to restart the server.
 
@@ -140,7 +146,7 @@ Next, we need to wrap any blocks of code that require this dynamic data in 'raw-
 
 The below sample code shows how an app could be configured to use 2-stage compilation and raw-blocks. In the example the transform method is passing back static data, but in a real-world situation it would most likely return the result of a database query.
 
-**HTML**
+HTML
 ```html
 <-- This is just a snippet, not a whole file -->
 {{{{raw-block}}}}
@@ -152,7 +158,7 @@ The below sample code shows how an app could be configured to use 2-stage compil
 {{{{/raw-block}}}}
 ```
 
-**Node Js**
+Node Js
 ```javascript
 var compilerFactory = require('shaman-website-compiler').ShamanWebsiteCompilerFactory;
 var nodePath = require('path');
@@ -182,6 +188,9 @@ var compiler = compilerFactory({
         }
     }
 });
+
+var express = require('express');
+var app = express();
 compiler.compile(app).then(function() {
 	// ...
 });
