@@ -12,7 +12,7 @@ function bundleFileContents(config, objectHash, minifyJs, minifyCss) {
     var cssBundle = getCompressedCssFiles(minifyCss, cssFiles);
     var bundles = [];
     bundles.push({
-        name: objectHash(jsBundle).substring(0, 25) + ".bundle.min.js",
+        name: objectHash(jsBundle).substring(0, 20) + "swc.bundle.min.js",
         contents: jsBundle,
         type: 'js.bundle.hash'
     });
@@ -22,7 +22,7 @@ function bundleFileContents(config, objectHash, minifyJs, minifyCss) {
         type: 'js.bundle'
     });
     bundles.push({
-        name: objectHash(cssBundle).substring(0, 25) + ".bundle.min.css",
+        name: objectHash(cssBundle).substring(0, 20) + "swc.bundle.min.css",
         contents: cssBundle,
         type: 'css.bundle.hash'
     });

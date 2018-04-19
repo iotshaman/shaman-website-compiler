@@ -11,7 +11,7 @@ export interface CompilerConfig {
     wwwRoot?: string;
     noHtmlSuffix?: boolean;
     autoWatch?: boolean;
-    transformData?: (path: string) => any;
+    transformModels?: (path: string, data: any) => any;
 }
 
 export interface WebpageDefaults {

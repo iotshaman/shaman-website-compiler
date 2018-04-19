@@ -1,7 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var CompilerRuntime = /** @class */ (function () {
-    function CompilerRuntime() {
+    function CompilerRuntime(isProd) {
+        this.isProd = !!isProd;
     }
     return CompilerRuntime;
 }());
