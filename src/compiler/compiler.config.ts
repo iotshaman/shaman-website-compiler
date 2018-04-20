@@ -1,9 +1,9 @@
 export interface CompilerConfig {
     cwd: string;
+    defaults?: WebpageDefaults;
     pages?: string[];
     partials?: string[];
     dynamicPages?: DynamicPage[];
-    defaults?: WebpageDefaults;
     scripts?: string[];
     styles?: string[];
     isProd?: boolean;

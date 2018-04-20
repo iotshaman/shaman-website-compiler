@@ -1,14 +1,18 @@
 import * as Promise from 'promise';
-import { CompilerRuntime } from '../compiler';
+import { CompilerRuntime, DynamicPage } from '../compiler';
 import { FileContents } from './file.contents';
 import * as nodePath from 'path';
 
-export function loadFileContents(config: CompilerRuntime, fsx: any) {
+export function loadFileContents(runtime: CompilerRuntime, dynamicPages: DynamicPage[], fsx: any) {
+    let dynamicTemplates = dynamicPages.map((page: DynamicPage) => {
+        return page.template;
+    });
     let fileLoaderOperations: Promise<FileContents[]>[] = [
-        fileLoaderFactory(config.cwd, config.files.pages, 'html', fsx),
-        fileLoaderFactory(config.cwd, config.files.partials, 'partial', fsx),
-        fileLoaderFactory(config.cwd, config.files.styles, 'css', fsx),
-        fileLoaderFactory(config.cwd, config.files.scripts, 'js', fsx),
+        fileLoaderFactory(runtime.cwd, runtime.files.pages, 'html', fsx),
+        fileLoaderFactory(runtime.cwd, runtime.files.styles, 'css', fsx),
+        fileLoaderFactory(runtime.cwd, runtime.files.scripts, 'js', fsx),
+        fileLoaderFactory(runtime.cwd, runtime.files.partials, 'partial', fsx),
+        fileLoaderFactory(runtime.cwd, dynamicTemplates, 'dynamic', fsx)
     ]
     return Promise.all(fileLoaderOperations).then((contents: FileContents[][]) => {
         return contents.reduce((a: FileContents[], b: FileContents[]) => {

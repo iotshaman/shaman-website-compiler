@@ -31,7 +31,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
             });
         };
         this.loadRuntimeContent = function () {
-            return file_contents_1.loadFileContents(_this.runtime, _this.fsx)
+            return file_contents_1.loadFileContents(_this.runtime, _this.dynamicPages, _this.fsx)
                 .then(function (contents) {
                 _this.runtime.contents = contents;
                 return;
@@ -67,7 +67,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
             });
         };
         this.compileHandlebarsTemplates = function () {
-            return handlebars_1.compileTemplates(_this.runtime, _this.handlebars)
+            return handlebars_1.compileTemplates(_this.runtime, _this.handlebars, _this.dynamicPages)
                 .then(function (routes) {
                 _this.runtime.routes = routes;
                 return;
@@ -109,11 +109,12 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
         this.runtime = new compiler_runtime_1.CompilerRuntime(config.isProd);
         this.runtime.cwd = config.cwd;
         this.runtime.globs = {
-            pages: !!config.pages ? config.pages : ['**/*.html', '!**/*.partial.html'],
+            pages: !!config.pages ? config.pages : ['**/*.html', '!**/*.partial.html', '!**/*.dynamic.html'],
             partials: !!config.partials ? config.partials : ['**/*.partial.html'],
             styles: !!config.styles ? config.styles : ['**/*.css'],
             scripts: !!config.scripts ? config.scripts : ['**/*.js']
         };
+        this.dynamicPages = !!config.dynamicPages ? config.dynamicPages : [];
         this.isProd = !!config.isProd;
         this.outDir = !!config.outDir ? config.outDir : '';
         this.wwwRoot = !!config.wwwRoot ? config.wwwRoot : '';

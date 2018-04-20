@@ -2,12 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var Promise = require("promise");
 var nodePath = require("path");
-function loadFileContents(config, fsx) {
+function loadFileContents(runtime, dynamicPages, fsx) {
+    var dynamicTemplates = dynamicPages.map(function (page) {
+        return page.template;
+    });
     var fileLoaderOperations = [
-        fileLoaderFactory(config.cwd, config.files.pages, 'html', fsx),
-        fileLoaderFactory(config.cwd, config.files.partials, 'partial', fsx),
-        fileLoaderFactory(config.cwd, config.files.styles, 'css', fsx),
-        fileLoaderFactory(config.cwd, config.files.scripts, 'js', fsx),
+        fileLoaderFactory(runtime.cwd, runtime.files.pages, 'html', fsx),
+        fileLoaderFactory(runtime.cwd, runtime.files.styles, 'css', fsx),
+        fileLoaderFactory(runtime.cwd, runtime.files.scripts, 'js', fsx),
+        fileLoaderFactory(runtime.cwd, runtime.files.partials, 'partial', fsx),
+        fileLoaderFactory(runtime.cwd, dynamicTemplates, 'dynamic', fsx)
     ];
     return Promise.all(fileLoaderOperations).then(function (contents) {
         return contents.reduce(function (a, b) {

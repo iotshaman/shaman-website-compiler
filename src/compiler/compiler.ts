@@ -5,6 +5,7 @@ import { GlobFactory, GlobMap, loadFileNamesFromGlobs } from '../glob-data';
 import { FileContents, loadFileContents, bundleFileContents} from '../file-contents';
 import { FileData, loadFileDataModels, transformFileData } from '../file-model';
 import { registerHandlebars, compileTemplates } from '../handlebars';
+import { DynamicPage } from './index';
 
 export class ShamanWebsiteCompiler {
 
@@ -18,6 +19,7 @@ export class ShamanWebsiteCompiler {
     objectHash: any;
     //INTERNAL DEPENDENCIES
     protected runtime: CompilerRuntime;
+    protected dynamicPages: DynamicPage[];
     protected isProd: boolean;
     protected outDir: string;
     protected wwwRoot: string;
@@ -42,11 +44,12 @@ export class ShamanWebsiteCompiler {
         this.runtime = new CompilerRuntime(config.isProd);
         this.runtime.cwd = config.cwd;
         this.runtime.globs = {
-            pages: !!config.pages ? config.pages : ['**/*.html', '!**/*.partial.html'],
+            pages: !!config.pages ? config.pages : ['**/*.html', '!**/*.partial.html', '!**/*.dynamic.html'],
             partials: !!config.partials ? config.partials : ['**/*.partial.html'],
             styles: !!config.styles ? config.styles : ['**/*.css'],
             scripts: !!config.scripts ? config.scripts : ['**/*.js']
         }
+        this.dynamicPages = !!config.dynamicPages ? config.dynamicPages : [];
         this.isProd = !!config.isProd;
         this.outDir = !!config.outDir ? config.outDir : '';
         this.wwwRoot = !!config.wwwRoot ? config.wwwRoot : '';
@@ -91,7 +94,7 @@ export class ShamanWebsiteCompiler {
     }
 
     protected loadRuntimeContent = (): Promise<void> => {
-        return loadFileContents(this.runtime, this.fsx)
+        return loadFileContents(this.runtime, this.dynamicPages, this.fsx)
             .then((contents: FileContents[]) => {
                 this.runtime.contents = contents;
                 return;
@@ -131,7 +134,7 @@ export class ShamanWebsiteCompiler {
     }
 
     protected compileHandlebarsTemplates = (): Promise<void> => {
-        return compileTemplates(this.runtime, this.handlebars)
+        return compileTemplates(this.runtime, this.handlebars, this.dynamicPages)
             .then((routes: FileContents[]) => {
                 this.runtime.routes = routes;
                 return;
