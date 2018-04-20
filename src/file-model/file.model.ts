@@ -12,7 +12,7 @@ export function loadFileDataModels(runtime: CompilerRuntime, fsx: any): Promise<
             return fsx.readJson(path, (err: any, data: any) => {
                 res({
                     template: file,
-                    data: err ? {} : data
+                    data: err ? {} : (!!data ? data : {})
                 });
             });
         })
@@ -24,7 +24,7 @@ function getJsonFileList(runtime: CompilerRuntime) {
     let dynamicPages = runtime.contents.filter((file: FileContents) => {
         return file.type == 'dynamic';
     });
-    return runtime.files.partials.concat(dynamicPages.map((file: FileContents) => {
+    return runtime.files.pages.concat(dynamicPages.map((file: FileContents) => {
         return file.name;
     }));
 }

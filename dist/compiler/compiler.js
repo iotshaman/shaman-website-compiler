@@ -9,19 +9,30 @@ var handlebars_1 = require("../handlebars");
 var ShamanWebsiteCompiler = /** @class */ (function () {
     function ShamanWebsiteCompiler(config) {
         var _this = this;
+        this.compiled = false;
         this.router = function (req, res, next) {
-            if (!_this.runtime.routes)
-                return next(0);
-            if (req.method == "GET" && _this.runtime.routeMap[req.url] != null) {
-                return next(1);
+            if (!_this.runtime.routes) {
+                next(0);
+                return;
             }
-            else if (req.method == "GET" && req.url.indexOf('swc.bundle.min.js') > -1) {
-                return next(2);
+            else if (req.method == "GET" && req.url == '/') {
+                _this.loadExpressRoute(req, res, next, 'index', null);
+                return;
             }
-            else if (req.method == "GET" && req.url.indexOf('swc.bundle.min.css') > -1) {
-                return next(3);
+            else if (req.method == "GET" && _this.runtime.routeMap[req.url] != null) {
+                _this.loadExpressRoute(req, res, next, req.url, null);
+                return;
             }
-            next(4);
+            else if (_this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.js') > -1) {
+                _this.loadExpressRoute(req, res, next, req.url, 'js');
+                return;
+            }
+            else if (_this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.css') > -1) {
+                _this.loadExpressRoute(req, res, next, req.url, 'css');
+                return;
+            }
+            next();
+            return;
         };
         this.loadRuntimeFiles = function () {
             return glob_data_1.loadFileNamesFromGlobs(_this.runtime, _this.glob)
@@ -37,7 +48,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 return;
             });
         };
-        this.bundleRuntimeContents = function () {
+        this.bundleRuntimeContent = function () {
             return new Promise(function (res) {
                 if (!_this.isProd)
                     res();
@@ -84,6 +95,20 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 res();
             });
         };
+        this.transformRouteNames = function () {
+            return new Promise(function (res) {
+                if (!_this.wwwRoot) {
+                    res();
+                    return;
+                }
+                _this.runtime.routes = _this.runtime.routes.map(function (route) {
+                    route.name = route.name.replace(_this.wwwRoot, '');
+                    return route;
+                });
+                res();
+                return;
+            });
+        };
         this.loadRouteMap = function () {
             return new Promise(function (res) {
                 _this.runtime.routeMap = _this.runtime.routes.reduce(function (a, b, i) {
@@ -92,6 +117,44 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 }, {});
                 res();
             });
+        };
+        this.loadExpressRoute = function (req, res, next, path, bundleType) {
+            if (!!req.headers && !!req.headers['if-modified-since']) {
+                if (_this.lastModified <= new Date(req.headers['if-modified-since'])) {
+                    res.status(304).send('Not Modified');
+                    return;
+                }
+            }
+            var route = [];
+            if (!bundleType) {
+                route = _this.runtime.routes.filter(function (file) {
+                    return file.name == path;
+                });
+            }
+            else {
+                route = _this.runtime.routes.filter(function (file) {
+                    return file.type == bundleType + ".bundle.hash";
+                });
+            }
+            if (!route || route.length == 0) {
+                next();
+                return;
+            }
+            //SEND RESPONSE
+            res.writeHead(200, { 'Content-Type': _this.getMimeType(route[0].type) });
+            res.write(route[0].contents);
+            res.end();
+            return;
+            // next({ type: this.getMimeType(route[0].type), data: route[0].contents });
+        };
+        this.getMimeType = function (contentType) {
+            if (contentType.indexOf('css') > -1)
+                return 'text/css';
+            if (contentType.indexOf('js') > -1)
+                return 'text/javascript';
+            if (contentType.indexOf('html') > -1)
+                return 'text/html';
+            return 'text/plain';
         };
         if (!config.cwd)
             throw new Error('Must provide current working directory (cwd) in config.');
@@ -114,6 +177,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
             styles: !!config.styles ? config.styles : ['**/*.css'],
             scripts: !!config.scripts ? config.scripts : ['**/*.js']
         };
+        this.runtime.wwwRoot = config.wwwRoot;
         this.dynamicPages = !!config.dynamicPages ? config.dynamicPages : [];
         this.isProd = !!config.isProd;
         this.outDir = !!config.outDir ? config.outDir : '';
@@ -124,16 +188,20 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
     };
     ShamanWebsiteCompiler.prototype.compile = function () {
         var _this = this;
-        return this.loadRuntimeFiles()
+        this.lastModified = new Date((new Date()).toUTCString());
+        return Promise.resolve()
+            .then(this.loadRuntimeFiles)
             .then(this.loadRuntimeContent)
-            .then(this.bundleRuntimeContents)
+            .then(this.bundleRuntimeContent)
             .then(this.loadRuntimeModels)
             .then(this.transformRuntimeModels)
             .then(this.loadHandlebarsResources)
             .then(this.compileHandlebarsTemplates)
             .then(this.addAssetRoutes)
+            .then(this.transformRouteNames)
             .then(this.loadRouteMap)
             .then(function () {
+            _this.compiled = true;
             return _this.runtime;
         });
     };

@@ -26,6 +26,8 @@ export class ShamanWebsiteCompiler {
     protected noHtmlSuffix: boolean;
     protected autoWatch: boolean;
     protected transformModels: (path: string, data: any) => any;
+    private compiled: boolean = false;
+    private lastModified: Date;
 
     constructor(config: CompilerConfig) {
         if (!config.cwd) throw new Error('Must provide current working directory (cwd) in config.');
@@ -49,6 +51,7 @@ export class ShamanWebsiteCompiler {
             styles: !!config.styles ? config.styles : ['**/*.css'],
             scripts: !!config.scripts ? config.scripts : ['**/*.js']
         }
+        this.runtime.wwwRoot = config.wwwRoot;
         this.dynamicPages = !!config.dynamicPages ? config.dynamicPages : [];
         this.isProd = !!config.isProd;
         this.outDir = !!config.outDir ? config.outDir : '';
@@ -59,30 +62,37 @@ export class ShamanWebsiteCompiler {
     }
 
     public compile() {
-        return this.loadRuntimeFiles()
+        this.lastModified = new Date((new Date()).toUTCString());
+        return Promise.resolve()
+            .then(this.loadRuntimeFiles)
             .then(this.loadRuntimeContent)
-            .then(this.bundleRuntimeContents)
+            .then(this.bundleRuntimeContent)
             .then(this.loadRuntimeModels)
             .then(this.transformRuntimeModels)
             .then(this.loadHandlebarsResources)
             .then(this.compileHandlebarsTemplates)
             .then(this.addAssetRoutes)
+            .then(this.transformRouteNames)
             .then(this.loadRouteMap)
             .then(() => {
+                this.compiled = true;
                 return this.runtime;
             })
     }
 
     public router = (req, res, next) => {
-        if (!this.runtime.routes) return next(0);
-        if (req.method == "GET" && this.runtime.routeMap[req.url] != null) {
-            return next(1);
-        } else if (req.method == "GET" && req.url.indexOf('swc.bundle.min.js') > -1) {
-            return next(2);
-        } else if (req.method == "GET" && req.url.indexOf('swc.bundle.min.css') > -1) {
-            return next(3);
+        if (!this.runtime.routes) { 
+            next(0); return; 
+        } else if (req.method == "GET" && req.url == '/') {
+            this.loadExpressRoute(req, res, next, 'index', null); return;
+        } else if (req.method == "GET" && this.runtime.routeMap[req.url] != null) {
+            this.loadExpressRoute(req, res, next, req.url, null); return;
+        } else if (this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.js') > -1) {
+            this.loadExpressRoute(req, res, next, req.url, 'js'); return;
+        } else if (this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.css') > -1) {
+            this.loadExpressRoute(req, res, next, req.url, 'css'); return;
         }
-        next(4);
+        next(); return;
     }
 
     protected loadRuntimeFiles = (): Promise<void> => {
@@ -101,7 +111,7 @@ export class ShamanWebsiteCompiler {
             })
     }
 
-    protected bundleRuntimeContents = (): Promise<void> => {
+    protected bundleRuntimeContent = (): Promise<void> => {
         return new Promise((res) => {
             if (!this.isProd) res();
             let bundles = bundleFileContents(this.runtime, this.objectHash, this.minify, this.minifyCss);
@@ -152,6 +162,17 @@ export class ShamanWebsiteCompiler {
         });
     }
 
+    protected transformRouteNames = () => {
+        return new Promise((res) => {
+            if (!this.wwwRoot) { res(); return; }
+            this.runtime.routes = this.runtime.routes.map((route: FileContents) => {
+                route.name = route.name.replace(this.wwwRoot, '');
+                return route;
+            });
+            res(); return;
+        });
+    }
+
     protected loadRouteMap = () => {
         return new Promise((res) => {
             this.runtime.routeMap = this.runtime.routes.reduce((a: any, b: FileContents, i: number) => {
@@ -160,6 +181,37 @@ export class ShamanWebsiteCompiler {
             }, {});
             res();
         });
+    }
+
+    private loadExpressRoute = (req, res, next, path, bundleType) => {
+        if (!!req.headers && !!req.headers['if-modified-since']) {
+            if (this.lastModified <= new Date(req.headers['if-modified-since'])) {
+                res.status(304).send('Not Modified'); return;
+            }
+        }
+        let route: FileContents[] = [];
+        if (!bundleType) {
+            route = this.runtime.routes.filter((file: FileContents) => {
+                return file.name == path;
+            });
+        } else {
+            route = this.runtime.routes.filter((file: FileContents) => {
+                return file.type == `${bundleType}.bundle.hash`
+            });
+        }
+        if (!route || route.length == 0) { next(); return; }
+        //SEND RESPONSE
+        res.writeHead(200, {'Content-Type': this.getMimeType(route[0].type)});
+        res.write(route[0].contents);
+        res.end(); return;
+       // next({ type: this.getMimeType(route[0].type), data: route[0].contents });
+    }
+
+    private getMimeType = (contentType: string) => {
+        if (contentType.indexOf('css') > -1) return 'text/css'; 
+        if (contentType.indexOf('js') > -1) return 'text/javascript'; 
+        if (contentType.indexOf('html') > -1) return 'text/html'; 
+        return 'text/plain';
     }
 
 }

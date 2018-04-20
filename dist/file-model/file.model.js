@@ -10,7 +10,7 @@ function loadFileDataModels(runtime, fsx) {
             return fsx.readJson(path, function (err, data) {
                 res({
                     template: file,
-                    data: err ? {} : data
+                    data: err ? {} : (!!data ? data : {})
                 });
             });
         });
@@ -22,7 +22,7 @@ function getJsonFileList(runtime) {
     var dynamicPages = runtime.contents.filter(function (file) {
         return file.type == 'dynamic';
     });
-    return runtime.files.partials.concat(dynamicPages.map(function (file) {
+    return runtime.files.pages.concat(dynamicPages.map(function (file) {
         return file.name;
     }));
 }

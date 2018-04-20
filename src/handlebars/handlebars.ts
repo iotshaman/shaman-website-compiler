@@ -14,8 +14,8 @@ export function compileTemplates(runtime: CompilerRuntime, handlebars: any, dyna
 : Promise<FileContents[]> {
     return new Promise((res) => {
         let defaultOptions = {
-            scripts: getScripts(runtime.contents, runtime.isProd),
-            styles: getStyles(runtime.contents, runtime.isProd),
+            scripts: getScripts(runtime.contents, runtime.isProd, runtime.wwwRoot),
+            styles: getStyles(runtime.contents, runtime.isProd, runtime.wwwRoot),
             defaults: {}
         }
         let preCompile = getPreCompileData(runtime, defaultOptions);
@@ -82,23 +82,24 @@ function getPreCompileDynamicRoutes(runtime: CompilerRuntime, defaultOptions: an
     });
 }
 
-function getScripts(scripts: FileContents[], isProd: boolean) {
+function getScripts(scripts: FileContents[], isProd: boolean, wwwRoot: string) {
     let filtered = scripts.filter((file: FileContents) => {
         if (isProd) return file.type == 'js.bundle.hash';
         return file.type == 'js';
     });
     return filtered.map((file: FileContents) => {
-        return file.name;
+        if (!wwwRoot) return file.name;
+        return file.name.replace(wwwRoot, '');
     });
 }
 
-function getStyles(styles: FileContents[], isProd: boolean) {
+function getStyles(styles: FileContents[], isProd: boolean, wwwRoot: string) {
     let filtered = styles.filter((file: FileContents) => {
         if (isProd) return file.type == 'css.bundle.hash';
         return file.type == 'css';
-    });
-    
+    });    
     return filtered.map((file: FileContents) => {
-        return file.name;
+        if (!wwwRoot) return file.name;
+        return file.name.replace(wwwRoot, '');
     });
 }

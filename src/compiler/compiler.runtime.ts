@@ -12,6 +12,7 @@ export class CompilerRuntime {
     models: FileData[];
     routes: FileContents[];
     routeMap: any;
+    wwwRoot: string;
 
     constructor(isProd?: boolean) {
         this.isProd = !!isProd;

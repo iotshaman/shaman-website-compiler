@@ -11,8 +11,8 @@ exports.registerHandlebars = registerHandlebars;
 function compileTemplates(runtime, handlebars, dynamicPages) {
     return new Promise(function (res) {
         var defaultOptions = {
-            scripts: getScripts(runtime.contents, runtime.isProd),
-            styles: getStyles(runtime.contents, runtime.isProd),
+            scripts: getScripts(runtime.contents, runtime.isProd, runtime.wwwRoot),
+            styles: getStyles(runtime.contents, runtime.isProd, runtime.wwwRoot),
             defaults: {}
         };
         var preCompile = getPreCompileData(runtime, defaultOptions);
@@ -77,24 +77,28 @@ function getPreCompileDynamicRoutes(runtime, defaultOptions, dynamicPages) {
         return obj;
     });
 }
-function getScripts(scripts, isProd) {
+function getScripts(scripts, isProd, wwwRoot) {
     var filtered = scripts.filter(function (file) {
         if (isProd)
             return file.type == 'js.bundle.hash';
         return file.type == 'js';
     });
     return filtered.map(function (file) {
-        return file.name;
+        if (!wwwRoot)
+            return file.name;
+        return file.name.replace(wwwRoot, '');
     });
 }
-function getStyles(styles, isProd) {
+function getStyles(styles, isProd, wwwRoot) {
     var filtered = styles.filter(function (file) {
         if (isProd)
             return file.type == 'css.bundle.hash';
         return file.type == 'css';
     });
     return filtered.map(function (file) {
-        return file.name;
+        if (!wwwRoot)
+            return file.name;
+        return file.name.replace(wwwRoot, '');
     });
 }
 //# sourceMappingURL=handlebars.js.map
