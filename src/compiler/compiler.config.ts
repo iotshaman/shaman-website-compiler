@@ -12,6 +12,7 @@ export interface CompilerConfig {
     noHtmlSuffix?: boolean;
     autoWatch?: boolean;
     transformModels?: (path: string, data: any) => any;
+    cacheIntervals?: CacheIntervals;
 }
 
 export interface WebpageDefaults {
@@ -22,4 +23,8 @@ export interface WebpageDefaults {
 export interface DynamicPage {
     template: string;
     routes: string[];
+}
+
+export interface CacheIntervals {
+    [mimeType: string]: number;
 }

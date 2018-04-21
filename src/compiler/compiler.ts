@@ -1,5 +1,5 @@
 import * as Promise from 'promise';
-import { CompilerConfig } from './compiler.config';
+import { CompilerConfig, CacheIntervals } from './compiler.config';
 import { CompilerRuntime } from './compiler.runtime';
 import { GlobFactory, GlobMap, loadFileNamesFromGlobs } from '../glob-data'; 
 import { FileContents, loadFileContents, bundleFileContents} from '../file-contents';
@@ -26,6 +26,7 @@ export class ShamanWebsiteCompiler {
     protected noHtmlSuffix: boolean;
     protected autoWatch: boolean;
     protected transformModels: (path: string, data: any) => any;
+    protected cacheIntervals: CacheIntervals;
     private compiled: boolean = false;
     private lastModified: Date;
 
@@ -59,6 +60,7 @@ export class ShamanWebsiteCompiler {
         this.noHtmlSuffix = !!config.noHtmlSuffix;
         this.autoWatch = !!config.autoWatch;
         this.transformModels = config.transformModels;
+        this.cacheIntervals = !!config.cacheIntervals ? config.cacheIntervals : {};
     }
 
     public compile() {
@@ -82,7 +84,7 @@ export class ShamanWebsiteCompiler {
 
     public router = (req, res, next) => {
         if (!this.runtime.routes) { 
-            next(0); return; 
+            next(); return; 
         } else if (req.method == "GET" && req.url == '/') {
             this.loadExpressRoute(req, res, next, 'index', null); return;
         } else if (req.method == "GET" && this.runtime.routeMap[req.url] != null) {
@@ -200,11 +202,26 @@ export class ShamanWebsiteCompiler {
             });
         }
         if (!route || route.length == 0) { next(); return; }
-        //SEND RESPONSE
-        res.writeHead(200, {'Content-Type': this.getMimeType(route[0].type)});
-        res.write(route[0].contents);
+        return this.sendResponse(route[0].contents, route[0].type, res);
+    }
+
+    private sendResponse = (content: string, contentType: string, res) => {
+        let mimeType = this.getMimeType(contentType);
+        let cacheInterval = this.cacheIntervals[mimeType];
+        this.applyHttpHeaders(mimeType, cacheInterval, res);
+        res.write(content);
         res.end(); return;
-       // next({ type: this.getMimeType(route[0].type), data: route[0].contents });
+    }
+
+    private applyHttpHeaders = (mimeType: string, cacheInterval: number, res) => {
+        if (!!cacheInterval && cacheInterval != -1) {
+            this.applyCacheHeaders(cacheInterval, res);
+        } else if (!cacheInterval && !!this.cacheIntervals['*']) {
+            if (this.cacheIntervals['*'] != -1) {
+                this.applyCacheHeaders(this.cacheIntervals['*'], res);
+            }
+        } 
+        res.writeHead(200, {'Content-Type': mimeType});
     }
 
     private getMimeType = (contentType: string) => {
@@ -212,6 +229,12 @@ export class ShamanWebsiteCompiler {
         if (contentType.indexOf('js') > -1) return 'text/javascript'; 
         if (contentType.indexOf('html') > -1) return 'text/html'; 
         return 'text/plain';
+    }
+
+    private applyCacheHeaders(milliseconds: number, res) {
+        res.header('Last-Modified', this.lastModified.toUTCString());
+        res.header(`Cache-Control", "public, max-age=${milliseconds}`);
+        res.header("Expires", new Date(Date.now() + milliseconds).toUTCString());
     }
 
 }

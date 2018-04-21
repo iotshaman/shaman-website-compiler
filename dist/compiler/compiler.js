@@ -12,7 +12,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
         this.compiled = false;
         this.router = function (req, res, next) {
             if (!_this.runtime.routes) {
-                next(0);
+                next();
                 return;
             }
             else if (req.method == "GET" && req.url == '/') {
@@ -140,12 +140,26 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 next();
                 return;
             }
-            //SEND RESPONSE
-            res.writeHead(200, { 'Content-Type': _this.getMimeType(route[0].type) });
-            res.write(route[0].contents);
+            return _this.sendResponse(route[0].contents, route[0].type, res);
+        };
+        this.sendResponse = function (content, contentType, res) {
+            var mimeType = _this.getMimeType(contentType);
+            var cacheInterval = _this.cacheIntervals[mimeType];
+            _this.applyHttpHeaders(mimeType, cacheInterval, res);
+            res.write(content);
             res.end();
             return;
-            // next({ type: this.getMimeType(route[0].type), data: route[0].contents });
+        };
+        this.applyHttpHeaders = function (mimeType, cacheInterval, res) {
+            if (!!cacheInterval && cacheInterval != -1) {
+                _this.applyCacheHeaders(cacheInterval, res);
+            }
+            else if (!cacheInterval && !!_this.cacheIntervals['*']) {
+                if (_this.cacheIntervals['*'] != -1) {
+                    _this.applyCacheHeaders(_this.cacheIntervals['*'], res);
+                }
+            }
+            res.writeHead(200, { 'Content-Type': mimeType });
         };
         this.getMimeType = function (contentType) {
             if (contentType.indexOf('css') > -1)
@@ -185,6 +199,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
         this.noHtmlSuffix = !!config.noHtmlSuffix;
         this.autoWatch = !!config.autoWatch;
         this.transformModels = config.transformModels;
+        this.cacheIntervals = !!config.cacheIntervals ? config.cacheIntervals : {};
     };
     ShamanWebsiteCompiler.prototype.compile = function () {
         var _this = this;
@@ -204,6 +219,11 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
             _this.compiled = true;
             return _this.runtime;
         });
+    };
+    ShamanWebsiteCompiler.prototype.applyCacheHeaders = function (milliseconds, res) {
+        res.header('Last-Modified', this.lastModified.toUTCString());
+        res.header("Cache-Control\", \"public, max-age=" + milliseconds);
+        res.header("Expires", new Date(Date.now() + milliseconds).toUTCString());
     };
     return ShamanWebsiteCompiler;
 }());
