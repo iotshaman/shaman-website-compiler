@@ -6,10 +6,29 @@ var glob_data_1 = require("../glob-data");
 var file_contents_1 = require("../file-contents");
 var file_model_1 = require("../file-model");
 var handlebars_1 = require("../handlebars");
+var nodePath = require("path");
 var ShamanWebsiteCompiler = /** @class */ (function () {
     function ShamanWebsiteCompiler(config) {
         var _this = this;
         this.compiled = false;
+        this.compile = function () {
+            _this.lastModified = new Date((new Date()).toUTCString());
+            return Promise.resolve()
+                .then(_this.loadRuntimeFiles)
+                .then(_this.loadRuntimeContent)
+                .then(_this.bundleRuntimeContent)
+                .then(_this.loadRuntimeModels)
+                .then(_this.transformRuntimeModels)
+                .then(_this.loadHandlebarsResources)
+                .then(_this.compileHandlebarsTemplates)
+                .then(_this.addAssetRoutes)
+                .then(_this.transformRouteNames)
+                .then(_this.loadRouteMap)
+                .then(function () {
+                _this.finishCompilation();
+                return _this.runtime;
+            });
+        };
         this.router = function (req, res, next) {
             if (!_this.runtime.routes) {
                 next();
@@ -118,6 +137,42 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 res();
             });
         };
+        this.finishCompilation = function () {
+            var cleanup = [];
+            if (!_this.compiled && _this.autoWatch) {
+                var watchFiles = _this.getWatchFileList();
+                cleanup.push(_this.beginWatchFiles(watchFiles, _this.compile));
+            }
+            if (_this.outDir != '') {
+                _this.outputFilesToDirectory();
+            }
+            Promise.all(cleanup);
+            _this.compiled = true;
+        };
+        this.beginWatchFiles = function (fileList, callback) {
+            return new Promise(function (res, err) {
+                _this.gaze(fileList, function (ex, watcher) {
+                    if (ex)
+                        return err(ex);
+                    this.on('changed', function () {
+                        callback();
+                    });
+                    return res();
+                });
+            });
+        };
+        this.outputFilesToDirectory = function () {
+            var operations = _this.runtime.routes.map(function (file) {
+                var path = nodePath.join(_this.outDir, file.name);
+                if (file.type == 'router.html') {
+                    path = path + ".html";
+                }
+                return _this.fsx.outputFile(path, file.contents);
+            });
+            return Promise.all(operations).then(function () {
+                return;
+            });
+        };
         this.loadExpressRoute = function (req, res, next, path, bundleType) {
             if (!!req.headers && !!req.headers['if-modified-since']) {
                 if (_this.lastModified <= new Date(req.headers['if-modified-since'])) {
@@ -170,6 +225,19 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 return 'text/html';
             return 'text/plain';
         };
+        this.getWatchFileList = function () {
+            if (!_this.runtime)
+                return [];
+            var rslt = _this.runtime.files.pages.concat(_this.runtime.files.scripts);
+            rslt = rslt.concat(_this.runtime.files.styles);
+            rslt = rslt.concat(_this.runtime.files.partials);
+            rslt = rslt.concat(_this.dynamicPages.map(function (page) {
+                return page.template;
+            }));
+            return rslt.map(function (path) {
+                return nodePath.join(_this.runtime.cwd, path);
+            });
+        };
         if (!config.cwd)
             throw new Error('Must provide current working directory (cwd) in config.');
         this.glob = glob_data_1.GlobFactory({ cwd: config.cwd });
@@ -200,25 +268,6 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
         this.autoWatch = !!config.autoWatch;
         this.transformModels = config.transformModels;
         this.cacheIntervals = !!config.cacheIntervals ? config.cacheIntervals : {};
-    };
-    ShamanWebsiteCompiler.prototype.compile = function () {
-        var _this = this;
-        this.lastModified = new Date((new Date()).toUTCString());
-        return Promise.resolve()
-            .then(this.loadRuntimeFiles)
-            .then(this.loadRuntimeContent)
-            .then(this.bundleRuntimeContent)
-            .then(this.loadRuntimeModels)
-            .then(this.transformRuntimeModels)
-            .then(this.loadHandlebarsResources)
-            .then(this.compileHandlebarsTemplates)
-            .then(this.addAssetRoutes)
-            .then(this.transformRouteNames)
-            .then(this.loadRouteMap)
-            .then(function () {
-            _this.compiled = true;
-            return _this.runtime;
-        });
     };
     ShamanWebsiteCompiler.prototype.applyCacheHeaders = function (milliseconds, res) {
         res.header('Last-Modified', this.lastModified.toUTCString());

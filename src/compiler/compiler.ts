@@ -6,6 +6,7 @@ import { FileContents, loadFileContents, bundleFileContents} from '../file-conte
 import { FileData, loadFileDataModels, transformFileData } from '../file-model';
 import { registerHandlebars, compileTemplates } from '../handlebars';
 import { DynamicPage } from './index';
+import * as nodePath from 'path';
 
 export class ShamanWebsiteCompiler {
 
@@ -63,7 +64,7 @@ export class ShamanWebsiteCompiler {
         this.cacheIntervals = !!config.cacheIntervals ? config.cacheIntervals : {};
     }
 
-    public compile() {
+    public compile = () => {
         this.lastModified = new Date((new Date()).toUTCString());
         return Promise.resolve()
             .then(this.loadRuntimeFiles)
@@ -77,7 +78,7 @@ export class ShamanWebsiteCompiler {
             .then(this.transformRouteNames)
             .then(this.loadRouteMap)
             .then(() => {
-                this.compiled = true;
+                this.finishCompilation();
                 return this.runtime;
             })
     }
@@ -185,6 +186,42 @@ export class ShamanWebsiteCompiler {
         });
     }
 
+    protected finishCompilation = () => {
+        let cleanup: Promise<void>[] = [];
+        if (!this.compiled && this.autoWatch) {
+            let watchFiles: string[] = this.getWatchFileList();
+            cleanup.push(this.beginWatchFiles(watchFiles, this.compile))
+        }
+        if (this.outDir != '') {
+            this.outputFilesToDirectory();
+        }
+        Promise.all(cleanup);
+        this.compiled = true;
+    }
+
+    protected beginWatchFiles = (fileList: string[], callback): Promise<void> => {
+        return new Promise((res, err) => {
+            this.gaze(fileList, function (ex, watcher) {
+                if (ex) return err(ex); 
+                this.on('changed', () => { 
+                    callback(); 
+                });
+                return res();
+            });
+        });
+    }
+
+    protected outputFilesToDirectory = () => {
+        let operations: Promise<void>[] = this.runtime.routes.map((file: FileContents) => {
+            let path = nodePath.join(this.outDir, file.name);
+            if (file.type == 'router.html') { path = `${path}.html`; }
+            return this.fsx.outputFile(path, file.contents);
+        });
+        return Promise.all(operations).then(() => { 
+            return; 
+        });
+    }
+
     private loadExpressRoute = (req, res, next, path, bundleType) => {
         if (!!req.headers && !!req.headers['if-modified-since']) {
             if (this.lastModified <= new Date(req.headers['if-modified-since'])) {
@@ -235,6 +272,19 @@ export class ShamanWebsiteCompiler {
         res.header('Last-Modified', this.lastModified.toUTCString());
         res.header(`Cache-Control", "public, max-age=${milliseconds}`);
         res.header("Expires", new Date(Date.now() + milliseconds).toUTCString());
+    }
+
+    private getWatchFileList = (): string[] => {
+        if (!this.runtime) return [];
+        let rslt = this.runtime.files.pages.concat(this.runtime.files.scripts);
+        rslt = rslt.concat(this.runtime.files.styles);
+        rslt = rslt.concat(this.runtime.files.partials);
+        rslt = rslt.concat(this.dynamicPages.map((page: DynamicPage) => {
+            return page.template;
+        }));
+        return rslt.map((path: string) => {
+            return nodePath.join(this.runtime.cwd, path);
+        });
     }
 
 }
