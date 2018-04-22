@@ -1,17 +1,8 @@
-import { WebsiteConfig, WebpageDefaults, DynamicPage } from '../config/website.config';
-import * as Promise from 'promise';
-
-export class CompilerConfig {
-    glob: (patterns: string[]) => Promise<string[]>;
-    fsx: any;
-    handlebars: any;
-    minify: (contents: string) => any;
-    minifyCss: (contents: string) => any;
-    gaze: (pattern: string | string[], callback: any) => void;
+export interface CompilerConfig {
     cwd: string;
-    partials: string[];
-    pages: string[];
-    defaults: WebpageDefaults;
+    defaults?: WebpageDefaults;
+    pages?: string[];
+    partials?: string[];
     dynamicPages?: DynamicPage[];
     scripts?: string[];
     styles?: string[];
@@ -20,5 +11,20 @@ export class CompilerConfig {
     wwwRoot?: string;
     noHtmlSuffix?: boolean;
     autoWatch?: boolean;
-    transformData?: (path: string) => any;
+    transformModels?: (path: string, data: any) => any;
+    cacheIntervals?: CacheIntervals;
+}
+
+export interface WebpageDefaults {
+    title: string;
+    description: string;
+}
+
+export interface DynamicPage {
+    template: string;
+    routes: string[];
+}
+
+export interface CacheIntervals {
+    [mimeType: string]: number;
 }

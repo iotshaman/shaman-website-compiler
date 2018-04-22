@@ -1,197 +1,290 @@
-import { CompilerConfig } from './compiler.config';
-import { FileContents } from '../config/website.config';
-import { CompilerEngineApi, CompilerEngine } from './compiler.engine';
-import { TemplateEngine } from '../template-engine/template-engine';
-import { JavascriptEngine } from '../javascript-engine/javascript-engine';
-import { CssEngine } from '../css-engine/css-engine';
 import * as Promise from 'promise';
+import { CompilerConfig, CacheIntervals } from './compiler.config';
+import { CompilerRuntime } from './compiler.runtime';
+import { GlobFactory, GlobMap, loadFileNamesFromGlobs } from '../glob-data'; 
+import { FileContents, loadFileContents, bundleFileContents} from '../file-contents';
+import { FileData, loadFileDataModels, transformFileData } from '../file-model';
+import { registerHandlebars, compileTemplates } from '../handlebars';
+import { DynamicPage } from './index';
 import * as nodePath from 'path';
-import { watchFile } from 'fs-extra';
 
-export function ShamanWebsiteCompiler(config: CompilerConfig) {
-    return {
-        compile: (express?: any) => { return compileWebsite(config, express); }
+export class ShamanWebsiteCompiler {
+
+    //METHOD DEPENDENCIES
+    glob: (patterns: string[]) => Promise<string[]>;
+    fsx: any;
+    handlebars: any;
+    minify: (contents: any, opts: any) => any;
+    minifyCss: (contents: string) => any;
+    gaze: (pattern: string | string[], callback: any) => void;
+    objectHash: any;
+    //INTERNAL DEPENDENCIES
+    protected runtime: CompilerRuntime;
+    protected dynamicPages: DynamicPage[];
+    protected isProd: boolean;
+    protected outDir: string;
+    protected wwwRoot: string;
+    protected noHtmlSuffix: boolean;
+    protected autoWatch: boolean;
+    protected transformModels: (path: string, data: any) => any;
+    protected cacheIntervals: CacheIntervals;
+    private compiled: boolean = false;
+    private lastModified: Date;
+
+    constructor(config: CompilerConfig) {
+        if (!config.cwd) throw new Error('Must provide current working directory (cwd) in config.');
+        this.glob = GlobFactory({ cwd: config.cwd });
+        this.fsx = require('fs-extra');
+        this.handlebars = require('handlebars')
+        this.minify = require('uglify-es').minify;
+        this.minifyCss = require('clean-css');
+        this.gaze = require('gaze');
+        var hashFactory = require('node-object-hash');
+        this.objectHash = hashFactory({sort:true, coerce:true}).hash;
+        this.setDefaults(config);
     }
-}
 
-export function compileWebsite(config: CompilerConfig, express?: any) {
-    if (!config.outDir && !express) {
-        var e = "Shaman compiler: Please specify 'outDir' or pass an express server as an input parameter";
-        throw new Error(e);
-    }
-    return loadFileDataFromGlobs(config).then((globMap: GlobMap) => {
-        return loadCompilerEngines(config, globMap);  
-    }).then((engines: CompilerEngineList) => {
-        return CompilerEngine(engines);
-    }).then((compilerEngine: CompilerEngineApi): Promise<void> => {
-        if (!!express) {
-            return generateExpressRoutes(config, compilerEngine, express).then(function() {
-                express.use('/', primaryExpressRoute);
-                return;
-            });
-        }        
-        return compilerEngine.generateFileOutput().then((files: FileContents[]) => {
-            return writeFilesToOutputDir(config, files);
-        })
-    });
-}
-
-// LOAD FILE FROM GLOB CONFIG
-export function loadFileDataFromGlobs(config: CompilerConfig): Promise<GlobMap> {
-    let globOperations: Promise<GlobResult>[] = [
-        loadGlobData(config.glob, 'pages', config.pages),
-        loadGlobData(config.glob, 'partials', config.partials),
-        loadGlobData(config.glob, 'styles', config.styles),
-        loadGlobData(config.glob, 'scripts', config.scripts),
-    ]
-    return Promise.all(globOperations).then((globs: GlobResult[]) => {
-        return mapGlobData(globs);
-    });
-}
-
-export function loadGlobData(glob: any, name: string, pattern: string[]): Promise<GlobResult> {
-    return glob(pattern).then((files: string[]) => {
-        return { name: name, files: sortFiles(files) }
-    });
-}
-
-export function sortFiles(globs: string[]) {
-    return globs.sort((a: string, b: string) => {
-        return a.toUpperCase().localeCompare(b.toUpperCase());
-    });
-}
-
-export function mapGlobData(globs: GlobResult[]) {
-    var map = {};
-    for (var i = 0; i < globs.length; i++) {
-        map[globs[i].name] = globs[i].files;
-    }
-    return map;
-}
-
-export interface GlobResult {
-    name: string;
-    files: string[];
-}
-
-export interface GlobMap {
-    [type: string]: string[];
-}
-
-// LOAD ENGINES
-export function loadCompilerEngines(config: CompilerConfig, globMap: GlobMap) {
-    let engines: CompilerEngineList = {
-        templateEngine: TemplateEngine({
-            fsx: config.fsx,
-            handlebars: config.handlebars,
-            cwd: config.cwd,
-            defaults: config.defaults,
-            pages: !globMap['pages'] ? [] : globMap['pages'],
-            partials: !globMap['partials'] ? [] : globMap['partials'],
-            styles: !globMap['styles'] ? [] : globMap['styles'],
-            scripts: !globMap['scripts'] ? [] : globMap['scripts'],
-            isProd: config.isProd,
-            wwwRoot: config.wwwRoot,
-            noHtmlSuffix: config.noHtmlSuffix,
-            transformData: config.transformData,
-            dynamicPages: config.dynamicPages
-        }),
-        javascriptEngine: JavascriptEngine({
-            fsx: config.fsx,
-            minify: config.minify,
-            cwd: config.cwd,
-            scripts: !globMap['scripts'] ? [] : globMap['scripts'],
-            isProd: config.isProd
-        }),
-        cssEngine: CssEngine({
-            fsx: config.fsx,
-            minify: config.minifyCss,
-            cwd: config.cwd,
-            styles: !globMap['styles'] ? [] : globMap['styles'],
-            isProd: config.isProd
-        })
-    }
-    return engines;
-}
-
-export interface CompilerEngineList {
-    templateEngine: CompilerEngineApi;
-    javascriptEngine: CompilerEngineApi;
-    cssEngine: CompilerEngineApi;
-}
-
-// GENERATE NEW FILES IN OUTPUT DIRECTORY
-export function writeFilesToOutputDir(config: CompilerConfig, files: FileContents[]) {
-    let operations: Promise<void>[] = files.map((file: FileContents) => {
-        return config.fsx.outputFile(nodePath.join(config.outDir, file.name), file.contents);
-    });
-    return Promise.all(operations).then(() => { 
-        return; 
-    });
-}
-
-// CREATE EXPRESS ROUTES
-let watching: boolean = false;
-export function generateExpressRoutes(config: CompilerConfig, compilerEngine: CompilerEngineApi, express: any) {
-    return new Promise(function(res, err) {
-        compilerEngine.generateExpressRoutes().then(function(map) {
-            expressMap = map;
-            if (!!config.autoWatch && !watching) {
-                watching = true;
-                watchFiles(config, function() {
-                    console.log('Updating express routes...');
-                    lastModified = new Date((new Date()).toUTCString());
-                    generateExpressRoutes(config, compilerEngine, express);
-                });
-            }
-            return res();
-        });
-    })
-}
-
-let expressMap = {};
-let lastModified: Date = new Date((new Date()).toUTCString());
-let primaryExpressRoute = function(req, res, next) {
-    if (req.method == "GET" && !!expressMap[req.url]) {
-        if (!!req.headers['if-modified-since']) {
-            if (lastModified <= new Date(req.headers['if-modified-since'])) {
-                res.status(304).send('Not Modified');
-                return;
-            }
+    protected setDefaults(config: CompilerConfig) {
+        this.runtime = new CompilerRuntime(config.isProd);
+        this.runtime.cwd = config.cwd;
+        this.runtime.globs = {
+            pages: !!config.pages ? config.pages : ['**/*.html', '!**/*.partial.html', '!**/*.dynamic.html'],
+            partials: !!config.partials ? config.partials : ['**/*.partial.html'],
+            styles: !!config.styles ? config.styles : ['**/*.css'],
+            scripts: !!config.scripts ? config.scripts : ['**/*.js']
         }
-        res.header('Last-Modified', lastModified.toUTCString());
-        expressMap[req.url](req, res, next);
-    } else {
-        next();
+        this.runtime.wwwRoot = config.wwwRoot;
+        this.dynamicPages = !!config.dynamicPages ? config.dynamicPages : [];
+        this.isProd = !!config.isProd;
+        this.outDir = !!config.outDir ? config.outDir : '';
+        this.wwwRoot = !!config.wwwRoot ? config.wwwRoot : '';
+        this.noHtmlSuffix = !!config.noHtmlSuffix;
+        this.autoWatch = !!config.autoWatch;
+        this.transformModels = config.transformModels;
+        this.cacheIntervals = !!config.cacheIntervals ? config.cacheIntervals : {};
     }
-}
 
-// WATCH FILES
-export function watchFiles(config: CompilerConfig, callback: () => void) {
-    return new Promise((res, err) => {
-        loadFileDataFromGlobs(config).then((globMap: GlobMap) => {
-            var globs = getWatchFileList(config.cwd, globMap);
-            config.gaze(globs, function(ex, watcher) {
+    public compile = () => {
+        this.lastModified = new Date((new Date()).toUTCString());
+        return Promise.resolve()
+            .then(this.loadRuntimeFiles)
+            .then(this.loadRuntimeContent)
+            .then(this.bundleRuntimeContent)
+            .then(this.loadRuntimeModels)
+            .then(this.transformRuntimeModels)
+            .then(this.loadHandlebarsResources)
+            .then(this.compileHandlebarsTemplates)
+            .then(this.addAssetRoutes)
+            .then(this.transformRouteNames)
+            .then(this.loadRouteMap)
+            .then(() => {
+                this.finishCompilation();
+                return this.runtime;
+            })
+    }
+
+    public router = (req, res, next) => {
+        if (!this.runtime.routes) { 
+            next(); return; 
+        } else if (req.method == "GET" && req.url == '/') {
+            this.loadExpressRoute(req, res, next, 'index', null); return;
+        } else if (req.method == "GET" && this.runtime.routeMap[req.url] != null) {
+            this.loadExpressRoute(req, res, next, req.url, null); return;
+        } else if (this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.js') > -1) {
+            this.loadExpressRoute(req, res, next, req.url, 'js'); return;
+        } else if (this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.css') > -1) {
+            this.loadExpressRoute(req, res, next, req.url, 'css'); return;
+        }
+        next(); return;
+    }
+
+    protected loadRuntimeFiles = (): Promise<void> => {
+        return loadFileNamesFromGlobs(this.runtime, this.glob)
+            .then((files: GlobMap) => {
+                this.runtime.files = files;
+                return;
+            })
+    }
+
+    protected loadRuntimeContent = (): Promise<void> => {
+        return loadFileContents(this.runtime, this.dynamicPages, this.fsx)
+            .then((contents: FileContents[]) => {
+                this.runtime.contents = contents;
+                return;
+            })
+    }
+
+    protected bundleRuntimeContent = (): Promise<void> => {
+        return new Promise((res) => {
+            if (!this.isProd) res();
+            let bundles = bundleFileContents(this.runtime, this.objectHash, this.minify, this.minifyCss);
+            this.runtime.contents = this.runtime.contents.concat(bundles);
+            res();
+        });
+    }
+
+    protected loadRuntimeModels = (): Promise<void> => {
+        return loadFileDataModels(this.runtime, this.fsx)
+            .then((models: FileData[]) => {
+                this.runtime.models = models;
+                return;
+            })
+    }
+
+    protected transformRuntimeModels = (): Promise<void> => {
+        return transformFileData(this.runtime.models, this.transformModels)
+            .then((models: FileData[]) => {
+                this.runtime.models = models;
+                return;
+            })
+    }
+
+    protected loadHandlebarsResources = (): Promise<void> => {
+        return new Promise((res) => {
+            registerHandlebars(this.runtime, this.handlebars);
+            res();
+        });
+    }
+
+    protected compileHandlebarsTemplates = (): Promise<void> => {
+        return compileTemplates(this.runtime, this.handlebars, this.dynamicPages)
+            .then((routes: FileContents[]) => {
+                this.runtime.routes = routes;
+                return;
+            })
+    }
+
+    protected addAssetRoutes = () => {
+        return new Promise((res) => {
+            let assets = this.runtime.contents.filter((file: FileContents) => {
+                if (this.isProd) return file.type.indexOf('.bundle.hash') > -1;
+                return file.type == 'css' || file.type == 'js'; 
+            });
+            this.runtime.routes = this.runtime.routes.concat(assets);
+            res();
+        });
+    }
+
+    protected transformRouteNames = () => {
+        return new Promise((res) => {
+            if (!this.wwwRoot) { res(); return; }
+            this.runtime.routes = this.runtime.routes.map((route: FileContents) => {
+                route.name = route.name.replace(this.wwwRoot, '');
+                return route;
+            });
+            res(); return;
+        });
+    }
+
+    protected loadRouteMap = () => {
+        return new Promise((res) => {
+            this.runtime.routeMap = this.runtime.routes.reduce((a: any, b: FileContents, i: number) => {
+                a[b.name] = i;
+                return a;
+            }, {});
+            res();
+        });
+    }
+
+    protected finishCompilation = () => {
+        let cleanup: Promise<void>[] = [];
+        if (!this.compiled && this.autoWatch) {
+            let watchFiles: string[] = this.getWatchFileList();
+            cleanup.push(this.beginWatchFiles(watchFiles, this.compile))
+        }
+        if (this.outDir != '') {
+            this.outputFilesToDirectory();
+        }
+        Promise.all(cleanup);
+        this.compiled = true;
+    }
+
+    protected beginWatchFiles = (fileList: string[], callback): Promise<void> => {
+        return new Promise((res, err) => {
+            this.gaze(fileList, function (ex, watcher) {
                 if (ex) return err(ex); 
-                this.on('changed', () => { callback(); });
+                this.on('changed', () => { 
+                    callback(); 
+                });
                 return res();
             });
-        })
-    });
-}
+        });
+    }
 
-export function getWatchFileList(cwd: string, globMap: GlobMap) {
-    var globs = globMap['pages'].map((val) => {
-        return nodePath.join(cwd, val);
-    });
-    globs = globs.concat(globMap['partials'].map((val) => {
-        return nodePath.join(cwd, val);
-    }));
-    globs = globs.concat(globMap['scripts'].map((val) => {
-        return nodePath.join(cwd, val);
-    }));
-    globs = globs.concat(globMap['styles'].map((val) => {
-        return nodePath.join(cwd, val);
-    }));
-    return globs;
+    protected outputFilesToDirectory = () => {
+        let operations: Promise<void>[] = this.runtime.routes.map((file: FileContents) => {
+            let path = nodePath.join(this.outDir, file.name);
+            if (file.type == 'router.html') { path = `${path}.html`; }
+            return this.fsx.outputFile(path, file.contents);
+        });
+        return Promise.all(operations).then(() => { 
+            return; 
+        });
+    }
+
+    private loadExpressRoute = (req, res, next, path, bundleType) => {
+        if (!!req.headers && !!req.headers['if-modified-since']) {
+            if (this.lastModified <= new Date(req.headers['if-modified-since'])) {
+                res.status(304).send('Not Modified'); return;
+            }
+        }
+        let route: FileContents[] = [];
+        if (!bundleType) {
+            route = this.runtime.routes.filter((file: FileContents) => {
+                return file.name == path;
+            });
+        } else {
+            route = this.runtime.routes.filter((file: FileContents) => {
+                return file.type == `${bundleType}.bundle.hash`
+            });
+        }
+        if (!route || route.length == 0) { next(); return; }
+        return this.sendResponse(route[0].contents, route[0].type, res);
+    }
+
+    private sendResponse = (content: string, contentType: string, res) => {
+        let mimeType = this.getMimeType(contentType);
+        let cacheInterval = this.cacheIntervals[mimeType];
+        this.applyHttpHeaders(mimeType, cacheInterval, res);
+        res.write(content);
+        res.end(); return;
+    }
+
+    private applyHttpHeaders = (mimeType: string, cacheInterval: number, res) => {
+        if (!!cacheInterval && cacheInterval != -1) {
+            this.applyCacheHeaders(cacheInterval, res);
+        } else if (!cacheInterval && !!this.cacheIntervals['*']) {
+            if (this.cacheIntervals['*'] != -1) {
+                this.applyCacheHeaders(this.cacheIntervals['*'], res);
+            }
+        } 
+        res.writeHead(200, {'Content-Type': mimeType});
+    }
+
+    private getMimeType = (contentType: string) => {
+        if (contentType.indexOf('css') > -1) return 'text/css'; 
+        if (contentType.indexOf('js') > -1) return 'text/javascript'; 
+        if (contentType.indexOf('html') > -1) return 'text/html'; 
+        return 'text/plain';
+    }
+
+    private applyCacheHeaders(milliseconds: number, res) {
+        res.header('Last-Modified', this.lastModified.toUTCString());
+        res.header(`Cache-Control", "public, max-age=${milliseconds}`);
+        res.header("Expires", new Date(Date.now() + milliseconds).toUTCString());
+    }
+
+    private getWatchFileList = (): string[] => {
+        if (!this.runtime) return [];
+        let rslt = this.runtime.files.pages.concat(this.runtime.files.scripts);
+        rslt = rslt.concat(this.runtime.files.styles);
+        rslt = rslt.concat(this.runtime.files.partials);
+        rslt = rslt.concat(this.dynamicPages.map((page: DynamicPage) => {
+            return page.template;
+        }));
+        return rslt.map((path: string) => {
+            return nodePath.join(this.runtime.cwd, path);
+        });
+    }
+
 }
