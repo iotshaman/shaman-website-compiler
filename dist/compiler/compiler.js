@@ -155,6 +155,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                     if (ex)
                         return err(ex);
                     this.on('changed', function () {
+                        console.log('Updating express routes...');
                         callback();
                     });
                     return res();
