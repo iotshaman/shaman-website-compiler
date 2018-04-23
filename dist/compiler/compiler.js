@@ -121,7 +121,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                     return;
                 }
                 _this.runtime.routes = _this.runtime.routes.map(function (route) {
-                    route.name = route.name.replace(_this.wwwRoot, '');
+                    route.name = "/" + route.name.replace(_this.wwwRoot, '');
                     return route;
                 });
                 res();

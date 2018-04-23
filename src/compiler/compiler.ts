@@ -169,7 +169,7 @@ export class ShamanWebsiteCompiler {
         return new Promise((res) => {
             if (!this.wwwRoot) { res(); return; }
             this.runtime.routes = this.runtime.routes.map((route: FileContents) => {
-                route.name = route.name.replace(this.wwwRoot, '');
+                route.name = `/${route.name.replace(this.wwwRoot, '')}`;
                 return route;
             });
             res(); return;
@@ -204,6 +204,7 @@ export class ShamanWebsiteCompiler {
             this.gaze(fileList, function (ex, watcher) {
                 if (ex) return err(ex); 
                 this.on('changed', () => { 
+                    console.log('Updating express routes...');
                     callback(); 
                 });
                 return res();
