@@ -13,11 +13,11 @@ function registerHandlebarsPartials(runtime, handlebars) {
 }
 exports.registerHandlebarsPartials = registerHandlebarsPartials;
 function registerStylesPartial(handlebars) {
-    var styleLink = '<link href="{{this}}" rel="stylesheet" type="text/css">';
+    var styleLink = '<link href="/{{this}}" rel="stylesheet" type="text/css">';
     handlebars.registerPartial('$.styles', "{{#each $.styles}}\r\n" + styleLink + "\r\n{{/each}}");
 }
 function registerScriptsPartial(handlebars) {
-    var scriptLink = '<script src="{{this}}" type="text/javascript"></script>';
+    var scriptLink = '<script src="/{{this}}" type="text/javascript"></script>';
     handlebars.registerPartial('$.scripts', "{{#each $.scripts}}\r\n" + scriptLink + "\r\n{{/each}}");
 }
 function registerMetaTagPartial(handlebars) {

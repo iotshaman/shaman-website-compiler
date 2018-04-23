@@ -49,24 +49,24 @@ function getPreCompileData(runtime, defaultOptions) {
     });
 }
 function getPreCompileDynamicRoutes(runtime, defaultOptions, dynamicPages) {
-    var allRoutes = dynamicPages.map(function (page) {
-        var content = runtime.contents.filter(function (file) {
-            return file.name == page.template;
+    var pageGrid = dynamicPages.map(function (page) {
+        var contents = runtime.contents.filter(function (file) {
+            return file.type == 'dynamic' && file.name == page.template;
         });
         return page.routes.map(function (route) {
             return {
                 name: route,
-                contents: content[0].contents,
-                type: page.template
+                contents: contents.length > 0 ? contents[0].contents : '',
+                type: 'tmp'
             };
         });
     });
-    var routes = allRoutes.reduce(function (a, b) {
+    var pages = pageGrid.reduce(function (a, b) {
         return a.concat(b);
     }, []);
-    return routes.map(function (file) {
+    return pages.map(function (file) {
         var models = runtime.models.filter(function (data) {
-            return data.template == file.type;
+            return data.template == file.name;
         });
         var obj = {
             model: models.length > 0 ? models[0].data : {},

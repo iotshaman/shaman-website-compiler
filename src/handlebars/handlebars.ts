@@ -53,24 +53,24 @@ function getPreCompileData(runtime: CompilerRuntime, defaultOptions: any) {
 }
 
 function getPreCompileDynamicRoutes(runtime: CompilerRuntime, defaultOptions: any, dynamicPages: DynamicPage[]) {
-    let allRoutes: FileContents[][] = dynamicPages.map((page: DynamicPage) => {
-        let content = runtime.contents.filter((file: FileContents) => {
-            return file.name == page.template;
+    let pageGrid: FileContents[][] = dynamicPages.map((page: DynamicPage) => {
+        let contents = runtime.contents.filter((file: FileContents) => {
+            return file.type == 'dynamic' && file.name == page.template;
         });
         return page.routes.map((route: string) => {
             return {
                 name: route,
-                contents: content[0].contents,
-                type: page.template
+                contents: contents.length > 0 ? contents[0].contents : '',
+                type: 'tmp'
             }
         });
     });
-    let routes = allRoutes.reduce((a: FileContents[], b: FileContents[]) => {
+    let pages = pageGrid.reduce((a: FileContents[], b: FileContents[]) => {
         return a.concat(b);
     }, []);
-    return routes.map((file: FileContents) => {
+    return pages.map((file: FileContents) => {
         let models = runtime.models.filter((data: FileData) => {
-            return data.template == file.type;
+            return data.template == file.name;
         });
         let obj = {
             model: models.length > 0 ? models[0].data : {},

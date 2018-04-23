@@ -3,7 +3,7 @@ import { CompilerConfig, CacheIntervals } from './compiler.config';
 import { CompilerRuntime } from './compiler.runtime';
 import { GlobFactory, GlobMap, loadFileNamesFromGlobs } from '../glob-data'; 
 import { FileContents, loadFileContents, bundleFileContents} from '../file-contents';
-import { FileData, loadFileDataModels, transformFileData } from '../file-model';
+import { FileData, loadFileDataModels, transformFileData, transformDynamicFileData } from '../file-model';
 import { registerHandlebars, compileTemplates } from '../handlebars';
 import { DynamicPage } from './index';
 import * as nodePath from 'path';
@@ -72,6 +72,7 @@ export class ShamanWebsiteCompiler {
             .then(this.bundleRuntimeContent)
             .then(this.loadRuntimeModels)
             .then(this.transformRuntimeModels)
+            .then(this.transformDynamicRuntimeModels)
             .then(this.loadHandlebarsResources)
             .then(this.compileHandlebarsTemplates)
             .then(this.addAssetRoutes)
@@ -132,7 +133,15 @@ export class ShamanWebsiteCompiler {
     }
 
     protected transformRuntimeModels = (): Promise<void> => {
-        return transformFileData(this.runtime.models, this.transformModels)
+        return transformFileData(this.runtime, this.transformModels)
+            .then((models: FileData[]) => {
+                this.runtime.models = models;
+                return;
+            })
+    }
+
+    protected transformDynamicRuntimeModels = (): Promise<void> => {
+        return transformDynamicFileData(this.runtime, this.dynamicPages, this.transformModels)
             .then((models: FileData[]) => {
                 this.runtime.models = models;
                 return;
@@ -197,6 +206,7 @@ export class ShamanWebsiteCompiler {
         }
         Promise.all(cleanup);
         this.compiled = true;
+        console.log('Compilation complete!');
     }
 
     protected beginWatchFiles = (fileList: string[], callback): Promise<void> => {

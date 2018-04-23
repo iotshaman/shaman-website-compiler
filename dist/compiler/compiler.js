@@ -19,6 +19,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 .then(_this.bundleRuntimeContent)
                 .then(_this.loadRuntimeModels)
                 .then(_this.transformRuntimeModels)
+                .then(_this.transformDynamicRuntimeModels)
                 .then(_this.loadHandlebarsResources)
                 .then(_this.compileHandlebarsTemplates)
                 .then(_this.addAssetRoutes)
@@ -84,7 +85,14 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
             });
         };
         this.transformRuntimeModels = function () {
-            return file_model_1.transformFileData(_this.runtime.models, _this.transformModels)
+            return file_model_1.transformFileData(_this.runtime, _this.transformModels)
+                .then(function (models) {
+                _this.runtime.models = models;
+                return;
+            });
+        };
+        this.transformDynamicRuntimeModels = function () {
+            return file_model_1.transformDynamicFileData(_this.runtime, _this.dynamicPages, _this.transformModels)
                 .then(function (models) {
                 _this.runtime.models = models;
                 return;
@@ -148,6 +156,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
             }
             Promise.all(cleanup);
             _this.compiled = true;
+            console.log('Compilation complete!');
         };
         this.beginWatchFiles = function (fileList, callback) {
             return new Promise(function (res, err) {
