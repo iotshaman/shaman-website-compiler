@@ -87,7 +87,7 @@ export class ShamanWebsiteCompiler {
         if (!this.runtime.routes) { 
             next(); return; 
         } else if (req.method == "GET" && req.url == '/') {
-            this.loadExpressRoute(req, res, next, 'index', null); return;
+            this.loadExpressRoute(req, res, next, '/index', null); return;
         } else if (req.method == "GET" && this.runtime.routeMap[req.url] != null) {
             this.loadExpressRoute(req, res, next, req.url, null); return;
         } else if (this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.js') > -1) {

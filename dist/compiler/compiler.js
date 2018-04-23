@@ -35,7 +35,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 return;
             }
             else if (req.method == "GET" && req.url == '/') {
-                _this.loadExpressRoute(req, res, next, 'index', null);
+                _this.loadExpressRoute(req, res, next, '/index', null);
                 return;
             }
             else if (req.method == "GET" && _this.runtime.routeMap[req.url] != null) {
