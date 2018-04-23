@@ -20,7 +20,7 @@ export function transformDynamicFileData(
     //----------------------------------------------
     return new Promise((res) => {
         if (!transform || dynamicPages.length == 0) res(runtime.models);
-        let tmp: FileData[][] = dynamicPages.map((page: DynamicPage) => {
+        let pageGrid: FileData[][] = dynamicPages.map((page: DynamicPage) => {
             let model = runtime.models.filter((data: FileData) => {
                 return data.template == page.template;
             });
@@ -31,12 +31,13 @@ export function transformDynamicFileData(
                 }
             })
         });
-        let rslt: FileData[] = tmp.reduce((a: FileData[], b: FileData[]) => {
+        let pages: FileData[] = pageGrid.reduce((a: FileData[], b: FileData[]) => {
             return a.concat(b);
         }, []);
-        rslt = rslt.map((fileData: FileData) => {
-            fileData.data = transform(fileData.template, fileData.data);
-            return fileData;
+        let rslt: FileData[] = pages.map((fileData: FileData) => {
+            let rslt: FileData = JSON.parse(JSON.stringify(fileData));
+            rslt.data = transform(rslt.template, rslt.data);
+            return rslt;
         });
         res(rslt.concat(runtime.models));
     });

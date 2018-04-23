@@ -18,7 +18,7 @@ function transformDynamicFileData(runtime, dynamicPages, transform) {
     return new Promise(function (res) {
         if (!transform || dynamicPages.length == 0)
             res(runtime.models);
-        var tmp = dynamicPages.map(function (page) {
+        var pageGrid = dynamicPages.map(function (page) {
             var model = runtime.models.filter(function (data) {
                 return data.template == page.template;
             });
@@ -29,12 +29,13 @@ function transformDynamicFileData(runtime, dynamicPages, transform) {
                 };
             });
         });
-        var rslt = tmp.reduce(function (a, b) {
+        var pages = pageGrid.reduce(function (a, b) {
             return a.concat(b);
         }, []);
-        rslt = rslt.map(function (fileData) {
-            fileData.data = transform(fileData.template, fileData.data);
-            return fileData;
+        var rslt = pages.map(function (fileData) {
+            var rslt = JSON.parse(JSON.stringify(fileData));
+            rslt.data = transform(rslt.template, rslt.data);
+            return rslt;
         });
         res(rslt.concat(runtime.models));
     });
