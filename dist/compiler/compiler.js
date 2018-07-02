@@ -51,6 +51,11 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 _this.loadExpressRoute(req, res, next, req.url, 'css');
                 return;
             }
+            else if (req.method == 'GET' && req.url == '/env/rebuild') {
+                _this.compile();
+                res.json({ status: 'success' });
+                return;
+            }
             next();
             return;
         };

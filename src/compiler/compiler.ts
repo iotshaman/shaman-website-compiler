@@ -95,6 +95,8 @@ export class ShamanWebsiteCompiler {
             this.loadExpressRoute(req, res, next, req.url, 'js'); return;
         } else if (this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.css') > -1) {
             this.loadExpressRoute(req, res, next, req.url, 'css'); return;
+        } else if (req.method == 'GET' && req.url == '/env/rebuild') {
+            this.compile(); res.json({ status: 'success' }); return;
         }
         next(); return;
     }
