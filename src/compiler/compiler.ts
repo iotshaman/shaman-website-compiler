@@ -28,6 +28,7 @@ export class ShamanWebsiteCompiler {
     protected autoWatch: boolean;
     protected transformModels: (path: string, data: any) => any;
     protected cacheIntervals: CacheIntervals;
+    protected handlebarsHelpers: (handlebars: any) => void;
     private compiled: boolean = false;
     private lastModified: Date;
 
@@ -157,6 +158,7 @@ export class ShamanWebsiteCompiler {
     protected loadHandlebarsResources = (): Promise<void> => {
         return new Promise((res) => {
             registerHandlebars(this.runtime, this.handlebars);
+            if (!!this.handlebarsHelpers) this.handlebarsHelpers(this.handlebars);
             res();
         });
     }

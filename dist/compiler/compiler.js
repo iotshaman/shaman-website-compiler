@@ -109,6 +109,8 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
         this.loadHandlebarsResources = function () {
             return new Promise(function (res) {
                 handlebars_1.registerHandlebars(_this.runtime, _this.handlebars);
+                if (!!_this.handlebarsHelpers)
+                    _this.handlebarsHelpers(_this.handlebars);
                 res();
             });
         };

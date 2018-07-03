@@ -13,6 +13,7 @@ export interface CompilerConfig {
     autoWatch?: boolean;
     transformModels?: (path: string, data: any) => any;
     cacheIntervals?: CacheIntervals;
+    handlebarsHelpers?: (handlebars: any) => void;
 }
 
 export interface WebpageDefaults {
