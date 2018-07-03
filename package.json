@@ -1,6 +1,6 @@
 {
   "name": "shaman-website-compiler",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Generate website scaffolding in seconds. Compile to output with the CLI or compile to Express JS routes with Node JS. Built with SEO in mind.",
   "main": "scripts/index.js",
   "scripts": {

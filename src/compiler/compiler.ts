@@ -84,6 +84,10 @@ export class ShamanWebsiteCompiler {
             })
     }
 
+    public updateTransform = (transform: (path: string, data: any) => any): void => {
+        this.transformModels = transform;
+    }
+
     public router = (req, res, next) => {
         if (!this.runtime.routes) { 
             next(); return; 

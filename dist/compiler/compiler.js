@@ -30,6 +30,9 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 return _this.runtime;
             });
         };
+        this.updateTransform = function (transform) {
+            _this.transformModels = transform;
+        };
         this.router = function (req, res, next) {
             if (!_this.runtime.routes) {
                 next();
