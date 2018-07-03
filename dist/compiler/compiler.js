@@ -288,6 +288,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
         this.autoWatch = !!config.autoWatch;
         this.transformModels = config.transformModels;
         this.cacheIntervals = !!config.cacheIntervals ? config.cacheIntervals : {};
+        this.handlebarsHelpers = config.handlebarsHelpers;
     };
     ShamanWebsiteCompiler.prototype.applyCacheHeaders = function (milliseconds, res) {
         res.header('Last-Modified', this.lastModified.toUTCString());

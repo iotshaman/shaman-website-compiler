@@ -63,6 +63,7 @@ export class ShamanWebsiteCompiler {
         this.autoWatch = !!config.autoWatch;
         this.transformModels = config.transformModels;
         this.cacheIntervals = !!config.cacheIntervals ? config.cacheIntervals : {};
+        this.handlebarsHelpers = config.handlebarsHelpers;
     }
 
     public compile = () => {
