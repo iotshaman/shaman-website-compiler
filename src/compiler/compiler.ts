@@ -90,6 +90,10 @@ export class ShamanWebsiteCompiler {
         this.transformModels = transform;
     }
 
+    public updateDynamicPages = (pages: DynamicPage[]): void => {
+        this.dynamicPages = pages;
+    }
+
     public router = (req, res, next) => {
         if (!this.runtime.routes) { 
             next(); return; 

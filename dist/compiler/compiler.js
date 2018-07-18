@@ -33,6 +33,9 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
         this.updateTransform = function (transform) {
             _this.transformModels = transform;
         };
+        this.updateDynamicPages = function (pages) {
+            _this.dynamicPages = pages;
+        };
         this.router = function (req, res, next) {
             if (!_this.runtime.routes) {
                 next();
