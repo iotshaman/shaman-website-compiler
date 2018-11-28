@@ -53,7 +53,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 return;
             }
             else if (req.method == "GET" && _this.runtime.routeMap[routePath] != null) {
-                _this.loadExpressRoute(req, res, next, req.url, null);
+                _this.loadExpressRoute(req, res, next, routePath, null);
                 return;
             }
             else if (_this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.js') > -1) {

@@ -107,7 +107,7 @@ export class ShamanWebsiteCompiler {
         } else if (req.method == "GET" && req.url == '/') {
             this.loadExpressRoute(req, res, next, '/index', null); return;
         } else if (req.method == "GET" && this.runtime.routeMap[routePath] != null) {
-            this.loadExpressRoute(req, res, next, req.url, null); return;
+            this.loadExpressRoute(req, res, next, routePath, null); return;
         } else if (this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.js') > -1) {
             this.loadExpressRoute(req, res, next, req.url, 'js'); return;
         } else if (this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.css') > -1) {
