@@ -95,11 +95,18 @@ export class ShamanWebsiteCompiler {
     }
 
     public router = (req, res, next) => {
+        let routePath = req.url;
+        if (routePath.indexOf('?') > -1) {
+            routePath = routePath.substring(0, routePath.indexOf('?'));
+        }
+        else if (routePath.indexOf('#') > -1) {
+            routePath = routePath.substring(0, routePath.indexOf('#'));
+        }
         if (!this.runtime.routes) { 
             next(); return; 
         } else if (req.method == "GET" && req.url == '/') {
             this.loadExpressRoute(req, res, next, '/index', null); return;
-        } else if (req.method == "GET" && this.runtime.routeMap[req.url] != null) {
+        } else if (req.method == "GET" && this.runtime.routeMap[routePath] != null) {
             this.loadExpressRoute(req, res, next, req.url, null); return;
         } else if (this.isProd && req.method == "GET" && req.url.indexOf('swc.bundle.min.js') > -1) {
             this.loadExpressRoute(req, res, next, req.url, 'js'); return;

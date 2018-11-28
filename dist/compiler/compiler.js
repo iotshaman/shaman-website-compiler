@@ -37,6 +37,13 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
             _this.dynamicPages = pages;
         };
         this.router = function (req, res, next) {
+            var routePath = req.url;
+            if (routePath.indexOf('?') > -1) {
+                routePath = routePath.substring(0, routePath.indexOf('?'));
+            }
+            else if (routePath.indexOf('#') > -1) {
+                routePath = routePath.substring(0, routePath.indexOf('#'));
+            }
             if (!_this.runtime.routes) {
                 next();
                 return;
@@ -45,7 +52,7 @@ var ShamanWebsiteCompiler = /** @class */ (function () {
                 _this.loadExpressRoute(req, res, next, '/index', null);
                 return;
             }
-            else if (req.method == "GET" && _this.runtime.routeMap[req.url] != null) {
+            else if (req.method == "GET" && _this.runtime.routeMap[routePath] != null) {
                 _this.loadExpressRoute(req, res, next, req.url, null);
                 return;
             }
