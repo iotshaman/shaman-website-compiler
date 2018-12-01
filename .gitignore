@@ -1,19 +1,11 @@
-# Custom Ignores #
-##################
 node_modules
-node_modules/*
-.vscode
-.vscode/*
 shaman-website-compiler-*.tgz
 dist/**/*.spec.js 
 dist/**/*.spec.js.map
-.coveralls.yml
-coverage/
-coverage/*
-scripts/debug.js
-dynamicSample
-dynamicSample/*
-sample/dist
-sample/dist/*
-sample2
-sample2/*
+debug
+coverage
+.nyc_output
+app/config/*config.json
+**/*.log
+.vscode
+sample

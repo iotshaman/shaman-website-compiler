@@ -2,6 +2,8 @@
 
 ![npm badge](https://img.shields.io/npm/v/shaman-website-compiler.svg)
 
+#### Version 3.x has been release and I am still working on getting the readme updated. Version 3.x includes breaking changes, so stay tuned for a migration guide. Thanks!
+
 Automatically compiles and minifies your HTML, CSS and Javascript files and generates express routes (Node Js) using simple templating technology, or alternatively output the compiled files to a folder then deploy to you Apache / NGINX server. This package is available via NPM and is intended to abstract complex or lengthy processes like file minification, template engine setup, file caching, and server route generation, so that developers can focus of content generation. 
 
 Since the compiler takes raw templates and raw data, then compiles them before the page is ever requested, server response times are BLAZING fast. Shaman Website Compiler also has options for managing SEO (Search Engine Optimization), making it easier for your website to be found by search engines like Google, Bing, Yahoo, etc.

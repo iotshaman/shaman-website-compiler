@@ -1,1 +1,0 @@
-{"version":3,"file":"glob.factory.js","sourceRoot":"","sources":["../../src/glob-data/glob.factory.ts"],"names":[],"mappings":";;AAAA,oCAAsC;AACtC,iCAAmC;AAEnC,qBAA4B,OAAO;IAC/B,MAAM,CAAC,UAAC,QAAkB;QACtB,MAAM,CAAC,IAAI,OAAO,CAAC,UAAC,GAAG,IAAO,MAAM,CAAC,QAAQ,CAAC,QAAQ,EAAE,OAAO,CAAC,CAAC,IAAI,CAAC,GAAG,CAAC,CAAC,CAAC,CAAC,CAAC,CAAC;IACnF,CAAC,CAAA;AACL,CAAC;AAJD,kCAIC"}
