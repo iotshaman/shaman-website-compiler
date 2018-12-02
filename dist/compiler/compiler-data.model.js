@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var CompilerData = /** @class */ (function () {
     function CompilerData(config) {
         this.config = config;
-        this.compiled = false;
         this.state = 'load-globs';
         this.files = [];
         this.startTime = new Date();

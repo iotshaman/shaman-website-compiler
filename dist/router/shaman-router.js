@@ -11,7 +11,8 @@ var ShamanRouter = /** @class */ (function () {
         this.handlebars = Handlebars;
         this.utils = files_1.FileUtils;
         this.routes = {};
-        this.LoadRoutes = function () {
+        this.LoadRoutes = function (data) {
+            _this.data = data;
             _this.routes = _this.data.files
                 .filter(function (file) { return route_types_const_1.RouteTypes.indexOf(file.type) > -1; })
                 .reduce(function (a, b) {
@@ -28,6 +29,8 @@ var ShamanRouter = /** @class */ (function () {
                 a[name] = _this.ApplyHeaders(route);
                 return a;
             }, {});
+            if (_this.data.config.dynamicRoutePlugin)
+                _this.data.config.dynamicRoutePlugin(_this);
         };
         this.Express = function (req, res, next) {
             var routePath = req.url;
@@ -123,8 +126,7 @@ var ShamanRouter = /** @class */ (function () {
             });
             return data;
         };
-        this.data = data;
-        this.LoadRoutes();
+        this.LoadRoutes(data);
     }
     return ShamanRouter;
 }());

@@ -1,4 +1,5 @@
 import { CompilerData } from "./compiler-data.model";
+import { ShamanRouter } from "../router/shaman-router";
 
 export interface CompilerConfig {
   cwd?: string;
@@ -13,6 +14,7 @@ export interface CompilerConfig {
   autoWatch?: boolean;
   cacheIntervals?: CacheIntervals;
   handlebarsPlugin?: (handlebars: any, data: CompilerData) => void;
+  dynamicRoutePlugin?: (router: ShamanRouter) => void;
 }
 
 export interface CacheIntervals {

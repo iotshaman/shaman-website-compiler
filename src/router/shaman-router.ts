@@ -14,11 +14,11 @@ export class ShamanRouter {
   public routes: ShamanRouteMap = {};
 
   constructor(data: CompilerData) {
-    this.data = data;
-    this.LoadRoutes();
+    this.LoadRoutes(data);
   }
 
-  private LoadRoutes = () => {
+  public LoadRoutes = (data: CompilerData) => {
+    this.data = data;
     this.routes = this.data.files
       .filter(file => RouteTypes.indexOf(file.type) > -1)
       .reduce((a: ShamanRouteMap, b: FileData) => {
@@ -34,6 +34,7 @@ export class ShamanRouter {
         a[name] = this.ApplyHeaders(route);
         return a;
       }, {})
+    if (this.data.config.dynamicRoutePlugin) this.data.config.dynamicRoutePlugin(this);
   }
 
   public Express = (req, res, next) => {
