@@ -9,3 +9,4 @@ app/config/*config.json
 **/*.log
 .vscode
 sample
+sample-output

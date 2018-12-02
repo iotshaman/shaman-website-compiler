@@ -1,10 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var inversify_1 = require("../inversify");
-var compiler_data_model_1 = require("./compiler-data.model");
-var shaman_router_1 = require("../router/shaman-router");
 var Gaze = require("gaze");
 var NodePath = require("path");
+var Promise = require("promise");
+var compiler_data_model_1 = require("./compiler-data.model");
+var shaman_router_1 = require("../router/shaman-router");
 var Compiler = /** @class */ (function () {
     function Compiler() {
         var _this = this;
@@ -44,14 +45,18 @@ var Compiler = /** @class */ (function () {
         };
         this.FinishCompilation = function (data) {
             data.endTime = new Date();
-            if (_this.listening) {
-                _this.shamanRouter.LoadRoutes(data);
-                return;
+            if (!_this.listening) {
+                _this.shamanRouter = new shaman_router_1.ShamanRouter(data);
+                _this.WriteFilesToDisk(_this.shamanRouter).then(function () {
+                    if (_this.config.autoWatch)
+                        _this.WatchFiles(data, _this.Compile);
+                    _this.onCompileEnd({ data: data, router: _this.shamanRouter });
+                });
             }
-            _this.shamanRouter = new shaman_router_1.ShamanRouter(data);
-            if (_this.config.autoWatch)
-                _this.WatchFiles(data, _this.Compile);
-            _this.onCompileEnd({ data: data, router: _this.shamanRouter });
+            else {
+                _this.shamanRouter.LoadRoutes(data);
+                _this.WriteFilesToDisk(_this.shamanRouter);
+            }
         };
         this.GetCompilerState = function (data) {
             var state = _this.states.find(function (s) { return s.state == data.state; });
@@ -80,7 +85,22 @@ var Compiler = /** @class */ (function () {
                 return NodePath.join(_this.config.cwd, file.name);
             });
         };
+        this.WriteFilesToDisk = function (router) {
+            if (!_this.config.outputFolder)
+                return Promise.resolve();
+            var keys = Object.keys(router.routes);
+            var files = keys.map(function (key) {
+                return router.routes[key];
+            });
+            var operations = files.map(function (route) {
+                return _this.fileService.WriteFile(_this.config.outputFolder, route.path, route.content);
+            });
+            return Promise.all(operations).then(function () { return; }).catch(function (ex) {
+                _this.onCompileError(ex);
+            });
+        };
         this.states = inversify_1.IOC.getAll(inversify_1.IOC_TYPES.CompilerState);
+        this.fileService = inversify_1.IOC.get(inversify_1.IOC_TYPES.FileService);
     }
     return Compiler;
 }());

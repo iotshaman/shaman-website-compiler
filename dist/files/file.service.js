@@ -37,6 +37,12 @@ var FileService = /** @class */ (function () {
                 });
             });
         };
+        this.WriteFile = function (cwd, path, contents) {
+            return new Promise(function (res) {
+                var fullPath = _this.path.join(cwd, path);
+                return _this.fs.outputFile(fullPath, contents).then(function () { res(); });
+            });
+        };
     }
     FileService = __decorate([
         inversify_1.injectable(),

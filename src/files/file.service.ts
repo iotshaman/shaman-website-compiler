@@ -7,6 +7,7 @@ import "reflect-metadata";
 export interface IFileService {
   ReadFile(cwd: string, path: string): Promise<string>;
   ReadJson(cwd: string, path: string): Promise<any>;
+  WriteFile(cwd: string, path: string, contents: string): Promise<any>;
 }
 
 @injectable()
@@ -34,6 +35,13 @@ export class FileService implements IFileService {
         return res(error ? {} : data);
       });
     });
+  }
+
+  WriteFile = (cwd: string, path: string, contents: string): Promise<void> => {
+    return new Promise((res) => {
+      let fullPath = this.path.join(cwd, path);
+      return this.fs.outputFile(fullPath, contents).then(() => { res(); })
+    })
   }
 
 }

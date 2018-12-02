@@ -9,7 +9,8 @@ export interface CompilerConfig {
   partials?: string[];
   scripts?: string[];
   styles?: string[];
-  wwwRoot?: string;
+  htmlRoot?: string;
+  outputFolder?: string;
   dropHtmlSuffix?: boolean;
   autoWatch?: boolean;
   cacheIntervals?: CacheIntervals;

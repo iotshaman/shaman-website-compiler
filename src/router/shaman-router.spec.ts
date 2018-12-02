@@ -33,7 +33,7 @@ describe('Shaman Router', () => {
   });
 
   it('Shaman router should remove wwwRoot from routes', () => {
-    let data = new CompilerData({ wwwRoot: 'views/' });
+    let data = new CompilerData({ htmlRoot: 'views/' });
     data.files = [{ name: 'views/test1.html', type: 'html', contents: '' }]
     data.endTime = new Date();
     let router = new ShamanRouter(data);

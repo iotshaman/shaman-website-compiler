@@ -1,11 +1,13 @@
 import { IOC, IOC_TYPES } from '../inversify';
+import * as Gaze from 'gaze';
+import * as NodePath from 'path';
+import * as Promise from 'promise';
 import { CompilerConfig } from "./compiler-config.model";
 import { ICompilerState } from '../compiler-states/compiler-state';
 import { CompilerData } from './compiler-data.model';
 import { ShamanRouter } from '../router/shaman-router';
-import { FileData } from '../files';
-import * as Gaze from 'gaze';
-import * as NodePath from 'path';
+import { FileData, IFileService } from '../files';
+import { RouteData } from '../router/shaman-route.model';
 
 export class Compiler {
 
@@ -13,13 +15,15 @@ export class Compiler {
   private config: CompilerConfig;
   private states: ICompilerState[]
   private currentState: ICompilerState
+  private fileService: IFileService;
   private shamanRouter: ShamanRouter;
+  private listening: boolean = false;
   public onCompileEnd: any;
   public onCompileError: any;
-  private listening: boolean = false;
 
   constructor() {
     this.states = IOC.getAll<ICompilerState>(IOC_TYPES.CompilerState);
+    this.fileService = IOC.get<IFileService>(IOC_TYPES.FileService);
   }
 
   Configure = (config: CompilerConfig) => {
@@ -54,13 +58,16 @@ export class Compiler {
 
   private FinishCompilation = (data: CompilerData) => {
     data.endTime = new Date();
-    if (this.listening) {
+    if (!this.listening) {
+      this.shamanRouter = new ShamanRouter(data);
+      this.WriteFilesToDisk(this.shamanRouter).then(() => {        
+        if (this.config.autoWatch) this.WatchFiles(data, this.Compile);
+        this.onCompileEnd({ data: data, router: this.shamanRouter });
+      });
+    } else {
       this.shamanRouter.LoadRoutes(data);
-      return;
-    }
-    this.shamanRouter = new ShamanRouter(data);
-    if (this.config.autoWatch) this.WatchFiles(data, this.Compile);
-    this.onCompileEnd({ data: data, router: this.shamanRouter });
+      this.WriteFilesToDisk(this.shamanRouter);
+    }    
   }
 
   private GetCompilerState = (data: CompilerData): ICompilerState => {
@@ -89,6 +96,20 @@ export class Compiler {
       .map((file: FileData) => {
         return NodePath.join(this.config.cwd, file.name);
       });
+  }
+
+  private WriteFilesToDisk = (router: ShamanRouter): Promise<void> => {  
+    if (!this.config.outputFolder) return Promise.resolve();
+    let keys: string[] = Object.keys(router.routes);  
+    let files: RouteData[] = keys.map((key: string) => {
+      return router.routes[key];
+    });
+    let operations: Promise<void>[] = files.map((route: RouteData) => {
+      return this.fileService.WriteFile(this.config.outputFolder, route.path, route.content);
+    });
+    return Promise.all(operations).then(() => { return; }).catch((ex) => {
+      this.onCompileError(ex);
+    });
   }
 
 }

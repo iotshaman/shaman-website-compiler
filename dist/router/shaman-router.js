@@ -20,12 +20,12 @@ var ShamanRouter = /** @class */ (function () {
                 if (b.type == 'html' && _this.data.config.dropHtmlSuffix) {
                     name = _this.utils.RemoveExtension(name, 'html');
                 }
-                if (b.type == 'html' && _this.data.config.wwwRoot) {
-                    name = name.replace(_this.data.config.wwwRoot, '');
+                if (b.type == 'html' && _this.data.config.htmlRoot) {
+                    name = name.replace(_this.data.config.htmlRoot, '');
                 }
                 if (!!a[name])
                     throw new Error("Shaman Router: route already exists - " + name);
-                var route = _this.CreateRoute(b);
+                var route = _this.CreateRoute(name, b);
                 a[name] = _this.ApplyHeaders(route);
                 return a;
             }, {});
@@ -56,12 +56,13 @@ var ShamanRouter = /** @class */ (function () {
             }
             next();
         };
-        this.CreateRoute = function (file) {
+        this.CreateRoute = function (name, file) {
             var content = file.contents;
             var options = { collapseWhitespace: true };
             if (_this.data.config.isProd)
                 content = _this.minifier(content, options);
             return {
+                path: name,
                 file: file,
                 content: content,
                 headers: [],
@@ -115,7 +116,7 @@ var ShamanRouter = /** @class */ (function () {
                 throw new Error("Shaman Router: could not find dynamic view - " + view);
             var compiler = _this.handlebars.compile(file.contents);
             file.contents = compiler({ compiler: data, model: _this.MergeDynamicModel(file, data) });
-            var routeData = _this.CreateRoute(file);
+            var routeData = _this.CreateRoute(route, file);
             routeData = _this.ApplyHeaders(routeData);
             _this.routes[route] = routeData;
         };

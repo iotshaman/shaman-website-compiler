@@ -62,4 +62,13 @@ describe('File Service', () => {
     })
   });
 
+  it('WriteFile should return and resolve empty promise', (done) => {
+    let fileService = new FileService();
+    let fileWriter = sandbox.stub(fileService.fs, 'outputFile');
+    fileWriter.returns(new Promise((res) => {res()}));
+    fileService.WriteFile('/home', 'file1.txt', '').then(() => {
+      done();
+    })
+  });
+
 });

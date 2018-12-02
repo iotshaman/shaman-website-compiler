@@ -5,6 +5,7 @@ export interface ShamanRouteMap {
 }
 
 export interface RouteData {
+  path: string;
   file: FileData;
   content: string;
   headers: HeaderData[];
