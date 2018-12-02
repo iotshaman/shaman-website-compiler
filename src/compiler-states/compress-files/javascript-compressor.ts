@@ -30,6 +30,7 @@ export class JavascriptCompressor extends CompilerState {
   }
 
   private CompressJavascriptFiles = (data: CompilerData): Promise<FileData[]> => {
+    if (!data.config.minify) return Promise.resolve([]);
     let files: FileData[] = data.files.filter(file => file.type == 'js');
     let operations: Promise<FileData>[] = files.map((file: FileData) => {
       return this.compressor.MinifyJs(file, null)

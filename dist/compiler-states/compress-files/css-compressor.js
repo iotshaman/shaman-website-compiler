@@ -34,6 +34,8 @@ var CssCompressor = /** @class */ (function (_super) {
         _this.state = 'compress-css';
         _this.utils = files_1.FileUtils;
         _this.CompressCssFiles = function (data) {
+            if (!data.config.minify)
+                return Promise.resolve([]);
             var files = data.files.filter(function (file) { return file.type == 'css'; });
             var operations = files.map(function (file) {
                 return _this.compressor.MinifyCss(file)

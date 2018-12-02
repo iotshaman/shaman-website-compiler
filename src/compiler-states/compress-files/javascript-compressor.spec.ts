@@ -27,6 +27,17 @@ describe('Javascript Compressor', () => {
     expect(jsCompressor).not.to.be.null;
   });
 
+  it('Process should do nothing if minify command not present', (done) => {
+    IOC.bind<IFileCompressor>(IOC_TYPES.FileCompressor).to(FileCompressor);
+    let jsCompressor = new JavascriptCompressor();
+    jsCompressor.OnStateChange((data: CompilerData) => {
+      expect(data.files.length).to.equal(0);
+      done();
+    })
+    let compilerData = new CompilerData({});
+    jsCompressor.Process(compilerData);    
+  });
+
   it('Process should add minified file to compiler data', (done) => {
     compressor.MinifyJs = sinon.stub();
     compressor.MinifyJs.returns(new Promise((res) => { res('') }));
@@ -37,7 +48,7 @@ describe('Javascript Compressor', () => {
       expect(data.files[1].type).to.equal('min.js');
       done();
     })
-    let compilerData = new CompilerData({});
+    let compilerData = new CompilerData({minify: true});
     compilerData.files = [{name: 'test.js', contents: '', type: 'js'}]
     jsCompressor.Process(compilerData);
   });
@@ -51,7 +62,7 @@ describe('Javascript Compressor', () => {
       expect(error.message).to.equal("error");
       done();
     })
-    let compilerData = new CompilerData({});
+    let compilerData = new CompilerData({minify: true});
     compilerData.files = [{name: 'test.js', contents: '', type: 'js'}]
     jsCompressor.Process(compilerData);
   });

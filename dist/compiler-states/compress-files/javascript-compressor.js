@@ -34,6 +34,8 @@ var JavascriptCompressor = /** @class */ (function (_super) {
         _this.state = 'compress-javascript';
         _this.utils = files_1.FileUtils;
         _this.CompressJavascriptFiles = function (data) {
+            if (!data.config.minify)
+                return Promise.resolve([]);
             var files = data.files.filter(function (file) { return file.type == 'js'; });
             var operations = files.map(function (file) {
                 return _this.compressor.MinifyJs(file, null)

@@ -9,6 +9,7 @@ export interface CompilerConfig {
   partials?: string[];
   scripts?: string[];
   styles?: string[];
+  minify?: boolean;
   htmlRoot?: string;
   outputFolder?: string;
   dropHtmlSuffix?: boolean;

@@ -30,6 +30,7 @@ export class CssCompressor extends CompilerState {
   }
 
   private CompressCssFiles = (data: CompilerData): Promise<FileData[]> => {
+    if (!data.config.minify) return Promise.resolve([]);
     let files: FileData[] = data.files.filter(file => file.type == 'css');
     let operations: Promise<FileData>[] = files.map((file: FileData) => {
       return this.compressor.MinifyCss(file)
