@@ -66,7 +66,9 @@ export class Compiler {
       });
     } else {
       this.shamanRouter.LoadRoutes(data);
-      this.WriteFilesToDisk(this.shamanRouter);
+      let update = this.WriteFilesToDisk(this.shamanRouter);
+      update.then(() => { console.log('Routes successfully updated!'); })
+      update.catch((ex) => { console.log(`An error occured while updating routes: ${ex.message}`); })
     }    
   }
 

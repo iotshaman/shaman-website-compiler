@@ -60,7 +60,9 @@ export class ShamanRouter {
   private CreateRoute = (name: string, file: FileData): RouteData => {
     let content = file.contents;
     let options = { collapseWhitespace: true };
-    if (this.data.config.isProd) content = this.minifier(content, options);
+    if ((file.type == 'html' || file.type == 'dynamic.html' ) && this.data.config.isProd) { 
+      content = this.minifier(content, options);
+    }
     return {
       path: name,
       file: file,

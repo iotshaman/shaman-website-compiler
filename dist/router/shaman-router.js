@@ -59,8 +59,9 @@ var ShamanRouter = /** @class */ (function () {
         this.CreateRoute = function (name, file) {
             var content = file.contents;
             var options = { collapseWhitespace: true };
-            if (_this.data.config.isProd)
+            if ((file.type == 'html' || file.type == 'dynamic.html') && _this.data.config.isProd) {
                 content = _this.minifier(content, options);
+            }
             return {
                 path: name,
                 file: file,
