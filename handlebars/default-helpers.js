@@ -4,6 +4,15 @@ module.exports = function(handlebars, data) {
     if (!isProd) return createBundleTags(bundles); 
     return createMinifiedBundleTags(bundles);
   });
+  handlebars.registerHelper('import-bundles', function(fileName, options) {
+    let file = data.files.find(f => f.name == fileName);
+    if (!file) throw new Error(`Import Bundles: file not found - ${fileName}`);
+    let model = !file.data ? {} : file.data;
+    let bundles = !model.shaman ? [] : (!model.shaman.bundles ? [] : model.shaman.bundles);
+    var isProd = !!data.config.isProd;
+    if (!isProd) return createBundleTags(bundles); 
+    return createMinifiedBundleTags(bundles);
+  });
 }
 
 function createBundleTags(bundles) {
