@@ -2,29 +2,37 @@ import { expect } from 'chai';
 import 'mocha';
 import * as sinon from 'sinon';
 import * as Promise from 'promise';
+import { IOC, IOC_TYPES } from '../inversify';
 
 import { ShamanRouter } from './shaman-router';
 import { CompilerData } from '../compiler/compiler-data.model';
+import { ISitemapFactory, SitemapFactory } from './sitemap-factory';
 
 describe('Shaman Router', () => {
 
   let sandbox;
+  let sitemapFactory;
 
   beforeEach(() => {
+    IOC.snapshot();
     sandbox = sinon.createSandbox();
+    sitemapFactory = sinon.createStubInstance(SitemapFactory);
   });
 
   afterEach(function () {
+    IOC.restore();
     sandbox.restore();
   });
 
   it('Should be created', () => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     let router = new ShamanRouter(data);
     expect(router).not.to.be.null;
   });
 
   it('Shaman router should load routes', () => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.files = [{ name: 'views/test1.html', type: 'html', contents: '' }]
     data.endTime = new Date();
@@ -33,6 +41,7 @@ describe('Shaman Router', () => {
   });
 
   it('Shaman router should remove wwwRoot from routes', () => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({ htmlRoot: 'views/' });
     data.files = [{ name: 'views/test1.html', type: 'html', contents: '' }]
     data.endTime = new Date();
@@ -41,6 +50,7 @@ describe('Shaman Router', () => {
   });
 
   it('Shaman router should lremove html suffix', () => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({ dropHtmlSuffix: true });
     data.files = [{ name: 'views/test1.html', type: 'html', contents: '' }]
     data.endTime = new Date();
@@ -49,6 +59,7 @@ describe('Shaman Router', () => {
   });
 
   it('Shaman router should throw error if duplicate route', (done) => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.endTime = new Date();
     data.files = [
@@ -64,6 +75,7 @@ describe('Shaman Router', () => {
   });
   
   it('Shaman router should load html mime type', () => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.files = [{ name: 'views/test1.html', type: 'html', contents: '' }]
     data.endTime = new Date();
@@ -72,6 +84,7 @@ describe('Shaman Router', () => {
   });
   
   it('Shaman router should load javascript mime type', () => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.files = [
       { name: 'views/test1.js', type: 'js', contents: '' },
@@ -86,6 +99,7 @@ describe('Shaman Router', () => {
   });
   
   it('Shaman router should load css mime type', () => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.files = [
       { name: 'views/test1.css', type: 'css', contents: '' },
@@ -100,6 +114,7 @@ describe('Shaman Router', () => {
   });
 
   it('Shaman router should apply cache headers', () => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.files = [{ name: 'test.html', type: 'html', contents: '' }]
     data.endTime = new Date();
@@ -110,6 +125,7 @@ describe('Shaman Router', () => {
   });
 
   it('Express method should call next if route not found', (done) => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     let router = new ShamanRouter(data);
     router.Express(mockRequest(), mockResponse(), () => {
@@ -118,6 +134,7 @@ describe('Shaman Router', () => {
   });
 
   it('Express method should render contents if route found ', (done) => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.files = [{ name: 'test.html', type: 'html', contents: 'test content' }]
     data.endTime = new Date();
@@ -130,6 +147,7 @@ describe('Shaman Router', () => {
   });
 
   it('Express method should render contents for default route', (done) => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.files = [{ name: 'index.html', type: 'html', contents: 'test content' }]
     data.endTime = new Date();
@@ -142,6 +160,7 @@ describe('Shaman Router', () => {
   });
 
   it('Express method should render contents for default route with no html suffix', (done) => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({dropHtmlSuffix: true});
     data.files = [{ name: 'index.html', type: 'html', contents: 'test content' }]
     data.endTime = new Date();
@@ -154,6 +173,7 @@ describe('Shaman Router', () => {
   });
 
   it('Express method should remove query string to find route', (done) => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.files = [{ name: 'test.html', type: 'html', contents: 'test content' }]
     data.endTime = new Date();
@@ -166,6 +186,7 @@ describe('Shaman Router', () => {
   });
 
   it('Express method should remove hash to find route', (done) => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.files = [{ name: 'test.html', type: 'html', contents: 'test content' }]
     data.endTime = new Date();
@@ -178,6 +199,7 @@ describe('Shaman Router', () => {
   });
 
   it('Shaman router should throw error if dynamic route is duplicate', (done) => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.endTime = new Date();
     data.files = [
@@ -193,6 +215,7 @@ describe('Shaman Router', () => {
   });
 
   it('LoadDynamicRoute should throw error if view not found', (done) => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.endTime = new Date();
     data.files = [
@@ -208,6 +231,7 @@ describe('Shaman Router', () => {
   });
 
   it('LoadDynamicRoute should throw error if view not found', () => {
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
     let data = new CompilerData({});
     data.endTime = new Date();
     data.files = [
@@ -219,6 +243,24 @@ describe('Shaman Router', () => {
     compiler.returns((data) => { return '' });
     router.LoadDynamicRoute('/test-dynamic.html', 'test.dynamic.html', {foo: "bar"});
     expect(router.routes['/test-dynamic.html']).not.to.be.null;
+  });
+
+  it('GenerateSitemap should do nothing if no sitemap config variable found', () => {
+    sitemapFactory.GenerateSitemap = sinon.stub();   
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).toConstantValue(sitemapFactory);
+    let data = new CompilerData({});
+    let router = new ShamanRouter(data);
+    sinon.assert.notCalled(sitemapFactory.GenerateSitemap);
+  });
+
+  it('GenerateSitemap should load sitemap', () => {
+    sitemapFactory.GenerateSitemap = sinon.stub();
+    sitemapFactory.GenerateSitemap.returns("sitemap content");    
+    IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).toConstantValue(sitemapFactory);
+    let data = new CompilerData({sitemap: {hostname: 'http://test.com'}});
+    let router = new ShamanRouter(data);
+    sinon.assert.calledOnce(sitemapFactory.GenerateSitemap);
+    expect(router.routes['/sitemap.xml']).not.to.be.null;
   });
 
 });

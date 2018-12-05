@@ -15,10 +15,17 @@ export interface CompilerConfig {
   dropHtmlSuffix?: boolean;
   autoWatch?: boolean;
   cacheIntervals?: CacheIntervals;
+  sitemap?: SitemapConfig;
   handlebarsPlugin?: (handlebars: any, data: CompilerData) => void;
   dynamicRoutePlugin?: (router: ShamanRouter) => void;
 }
 
 export interface CacheIntervals {
-    [mimeType: string]: number;
+  [mimeType: string]: number;
+}
+
+export interface SitemapConfig {
+  hostname: string;
+  cacheTime?: number;
+  ignore?: string[];
 }

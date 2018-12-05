@@ -13,6 +13,7 @@ import { CssCompressor } from "../compiler-states/compress-files/css-compressor"
 import { JavascriptBundler } from "../compiler-states/bundle-files/javascript-bundler";
 import { CssBundler } from "../compiler-states/bundle-files/css-bundler";
 import { Renderer } from "../compiler-states/render/renderer";
+import { ISitemapFactory, SitemapFactory } from "../router/sitemap-factory";
 
 export const IOC = new Container();
 
@@ -28,5 +29,6 @@ export function Configure() {
   IOC.bind<ICompilerState>(IOC_TYPES.CompilerState).to(JavascriptBundler);
   IOC.bind<ICompilerState>(IOC_TYPES.CompilerState).to(CssBundler);
   IOC.bind<ICompilerState>(IOC_TYPES.CompilerState).to(Renderer);
+  IOC.bind<ISitemapFactory>(IOC_TYPES.SitemapFactory).to(SitemapFactory);
   return IOC;
 }

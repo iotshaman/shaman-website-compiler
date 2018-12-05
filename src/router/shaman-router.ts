@@ -1,9 +1,11 @@
+import { IOC, IOC_TYPES } from '../inversify';
 import { CompilerData } from "../compiler/compiler-data.model";
 import { RouteTypes } from './route-types.const';
 import { FileData, FileUtils } from "../files";
 import { ShamanRouteMap, RouteData, HeaderData } from "./shaman-route.model";
 import { minify as Minifier } from 'html-minifier';
 import * as Handlebars from 'handlebars';
+import { ISitemapFactory } from "./sitemap-factory";
 
 export class ShamanRouter {
 
@@ -11,10 +13,14 @@ export class ShamanRouter {
   handlebars: any = Handlebars;
   private data: CompilerData;
   private utils = FileUtils;
+  private sitemapFactory: ISitemapFactory;
   public routes: ShamanRouteMap = {};
 
   constructor(data: CompilerData) {
+    this.sitemapFactory = IOC.get<ISitemapFactory>(IOC_TYPES.SitemapFactory);
     this.LoadRoutes(data);
+    this.LoadDynamicRoutes();
+    this.GenerateSitemap();
   }
 
   public LoadRoutes = (data: CompilerData) => {
@@ -33,8 +39,23 @@ export class ShamanRouter {
         let route: RouteData = this.CreateRoute(name, b);
         a[name] = this.ApplyHeaders(route);
         return a;
-      }, {})
+      }, {});
+  }
+
+  private LoadDynamicRoutes = () => {
     if (this.data.config.dynamicRoutePlugin) this.data.config.dynamicRoutePlugin(this);
+  }
+
+  private GenerateSitemap = () => {
+    if (!this.data.config.sitemap) return;
+    let sitemap = this.sitemapFactory.GenerateSitemap(this.data.config.sitemap, this.routes);
+    let file: FileData = {
+      name: 'sitemap.xml',
+      contents: sitemap,
+      type: 'xml'
+    }
+    let route: RouteData = this.CreateRoute('/sitemap.xml', file);
+    this.routes['/sitemap.xml'] = route;
   }
 
   public Express = (req, res, next) => {
@@ -77,6 +98,7 @@ export class ShamanRouter {
       case "html": case "dynamic.html": return 'text/html';
       case "js": case "min.js": case "bundle.js": return 'text/javascript';
       case "css": case "min.css": case "bundle.css": return "text/css";
+      case "xml": return "application/xml";
     }
   }
 

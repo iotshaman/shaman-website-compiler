@@ -1,6 +1,6 @@
 {
   "name": "shaman-website-compiler",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Generate website scaffolding in seconds. Compile to output with the CLI or compile to Express JS routes with Node JS. Built with SEO in mind.",
   "main": "index.js",
   "scripts": {
@@ -29,7 +29,8 @@
     "sinon-chai": "^3.2.0",
     "sinon-express-mock": "^2.0.5",
     "sinon-mongoose": "^2.2.1",
-    "ts-node": "7.0.1"
+    "ts-node": "7.0.1",
+    "typescript": "3.0.1"
   },
   "dependencies": {
     "clean-css": "^4.1.11",
@@ -42,7 +43,7 @@
     "node-object-hash": "1.4.1",
     "promise": "8.0.1",
     "reflect-metadata": "^0.1.12",
-    "typescript": "3.0.1",
+    "sitemap": "2.1.0",
     "uglify-es": "3.3.9"
   },
   "nyc": {

@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var inversify_1 = require("../inversify");
 var route_types_const_1 = require("./route-types.const");
 var files_1 = require("../files");
 var html_minifier_1 = require("html-minifier");
@@ -29,8 +30,22 @@ var ShamanRouter = /** @class */ (function () {
                 a[name] = _this.ApplyHeaders(route);
                 return a;
             }, {});
+        };
+        this.LoadDynamicRoutes = function () {
             if (_this.data.config.dynamicRoutePlugin)
                 _this.data.config.dynamicRoutePlugin(_this);
+        };
+        this.GenerateSitemap = function () {
+            if (!_this.data.config.sitemap)
+                return;
+            var sitemap = _this.sitemapFactory.GenerateSitemap(_this.data.config.sitemap, _this.routes);
+            var file = {
+                name: 'sitemap.xml',
+                contents: sitemap,
+                type: 'xml'
+            };
+            var route = _this.CreateRoute('/sitemap.xml', file);
+            _this.routes['/sitemap.xml'] = route;
         };
         this.Express = function (req, res, next) {
             var routePath = req.url;
@@ -80,6 +95,7 @@ var ShamanRouter = /** @class */ (function () {
                 case "css":
                 case "min.css":
                 case "bundle.css": return "text/css";
+                case "xml": return "application/xml";
             }
         };
         this.ApplyHeaders = function (route) {
@@ -128,7 +144,10 @@ var ShamanRouter = /** @class */ (function () {
             });
             return data;
         };
+        this.sitemapFactory = inversify_1.IOC.get(inversify_1.IOC_TYPES.SitemapFactory);
         this.LoadRoutes(data);
+        this.LoadDynamicRoutes();
+        this.GenerateSitemap();
     }
     return ShamanRouter;
 }());

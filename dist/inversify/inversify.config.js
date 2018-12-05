@@ -13,6 +13,7 @@ var css_compressor_1 = require("../compiler-states/compress-files/css-compressor
 var javascript_bundler_1 = require("../compiler-states/bundle-files/javascript-bundler");
 var css_bundler_1 = require("../compiler-states/bundle-files/css-bundler");
 var renderer_1 = require("../compiler-states/render/renderer");
+var sitemap_factory_1 = require("../router/sitemap-factory");
 exports.IOC = new inversify_1.Container();
 function Configure() {
     exports.IOC.bind(invesify_types_1.IOC_TYPES.GlobService).to(globs_1.GlobService);
@@ -26,6 +27,7 @@ function Configure() {
     exports.IOC.bind(invesify_types_1.IOC_TYPES.CompilerState).to(javascript_bundler_1.JavascriptBundler);
     exports.IOC.bind(invesify_types_1.IOC_TYPES.CompilerState).to(css_bundler_1.CssBundler);
     exports.IOC.bind(invesify_types_1.IOC_TYPES.CompilerState).to(renderer_1.Renderer);
+    exports.IOC.bind(invesify_types_1.IOC_TYPES.SitemapFactory).to(sitemap_factory_1.SitemapFactory);
     return exports.IOC;
 }
 exports.Configure = Configure;
