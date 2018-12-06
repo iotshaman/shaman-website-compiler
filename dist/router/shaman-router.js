@@ -94,7 +94,7 @@ var ShamanRouter = /** @class */ (function () {
             var content = file.contents;
             var options = { collapseWhitespace: true };
             if ((file.type == 'html' || file.type == 'dynamic.html') && _this.data.config.isProd) {
-                if (!file.data.shaman || file.data.shaman.minify === undefined || !file.data.shaman.minify) {
+                if (!file.data.shaman || file.data.shaman.minify === undefined || file.data.shaman.minify) {
                     content = _this.minifier(content, options);
                 }
             }
