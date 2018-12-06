@@ -101,7 +101,9 @@ export class ShamanRouter {
     let content = file.contents;
     let options = { collapseWhitespace: true };
     if ((file.type == 'html' || file.type == 'dynamic.html' ) && this.data.config.isProd) { 
-      content = this.minifier(content, options);
+      if (!file.data.shaman || file.data.shaman.minify === undefined || !file.data.shaman.minify) {
+        content = this.minifier(content, options);
+      }      
     }
     return {
       path: name,
