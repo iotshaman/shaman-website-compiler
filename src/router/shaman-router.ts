@@ -62,7 +62,7 @@ export class ShamanRouter {
       }, {});
   }
 
-  public LoadDynamicRoutes = () => {
+  private LoadDynamicRoutes = () => {
     if (this.data.config.dynamicRoutePlugin) this.data.config.dynamicRoutePlugin(this);
   }
 
@@ -72,8 +72,9 @@ export class ShamanRouter {
     let file = this.data.files.find(f => f.name == view);
     if (!file) throw new Error(`Shaman Router: could not find dynamic view - ${view}`);    
     let compiler = this.handlebars.compile(file.contents);
-    file.contents = compiler({ compiler: data, model: this.MergeDynamicModel(file, data) });
-    let routeData: RouteData = this.CreateRoute(route, file);
+    let newFile: FileData = { name: file.name, type: file.type, contents: '', data: file.data };
+    newFile.contents = compiler({ compiler: this.data, model: this.MergeDynamicModel(file, data) });
+    let routeData: RouteData = this.CreateRoute(route, newFile);
     routeData = this.ApplyHeaders(routeData);
     this.routes[route] = routeData;
   }

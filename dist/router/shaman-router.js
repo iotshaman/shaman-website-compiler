@@ -67,8 +67,9 @@ var ShamanRouter = /** @class */ (function () {
             if (!file)
                 throw new Error("Shaman Router: could not find dynamic view - " + view);
             var compiler = _this.handlebars.compile(file.contents);
-            file.contents = compiler({ compiler: data, model: _this.MergeDynamicModel(file, data) });
-            var routeData = _this.CreateRoute(route, file);
+            var newFile = { name: file.name, type: file.type, contents: '', data: file.data };
+            newFile.contents = compiler({ compiler: _this.data, model: _this.MergeDynamicModel(file, data) });
+            var routeData = _this.CreateRoute(route, newFile);
             routeData = _this.ApplyHeaders(routeData);
             _this.routes[route] = routeData;
         };
