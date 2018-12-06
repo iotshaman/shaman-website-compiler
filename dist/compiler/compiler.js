@@ -54,7 +54,7 @@ var Compiler = /** @class */ (function () {
                 });
             }
             else {
-                _this.shamanRouter.LoadRoutes(data);
+                _this.shamanRouter.RegenerateRoutes(data);
                 var update = _this.WriteFilesToDisk(_this.shamanRouter);
                 update.then(function () { console.log('Routes successfully updated!'); });
                 update.catch(function (ex) { console.log("An error occured while updating routes: " + ex.message); });

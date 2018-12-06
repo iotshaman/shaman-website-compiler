@@ -12,41 +12,6 @@ var ShamanRouter = /** @class */ (function () {
         this.handlebars = Handlebars;
         this.utils = files_1.FileUtils;
         this.routes = {};
-        this.LoadRoutes = function (data) {
-            _this.data = data;
-            _this.routes = _this.data.files
-                .filter(function (file) { return route_types_const_1.RouteTypes.indexOf(file.type) > -1; })
-                .reduce(function (a, b) {
-                var name = "/" + b.name;
-                if (b.type == 'html' && _this.data.config.dropHtmlSuffix) {
-                    name = _this.utils.RemoveExtension(name, 'html');
-                }
-                if (b.type == 'html' && _this.data.config.htmlRoot) {
-                    name = name.replace(_this.data.config.htmlRoot, '');
-                }
-                if (!!a[name])
-                    throw new Error("Shaman Router: route already exists - " + name);
-                var route = _this.CreateRoute(name, b);
-                a[name] = _this.ApplyHeaders(route);
-                return a;
-            }, {});
-        };
-        this.LoadDynamicRoutes = function () {
-            if (_this.data.config.dynamicRoutePlugin)
-                _this.data.config.dynamicRoutePlugin(_this);
-        };
-        this.GenerateSitemap = function () {
-            if (!_this.data.config.sitemap)
-                return;
-            var sitemap = _this.sitemapFactory.GenerateSitemap(_this.data.config.sitemap, _this.routes);
-            var file = {
-                name: 'sitemap.xml',
-                contents: sitemap,
-                type: 'xml'
-            };
-            var route = _this.CreateRoute('/sitemap.xml', file);
-            _this.routes['/sitemap.xml'] = route;
-        };
         this.Express = function (req, res, next) {
             var routePath = req.url;
             if (routePath.indexOf('?') > -1) {
@@ -70,6 +35,59 @@ var ShamanRouter = /** @class */ (function () {
                 return;
             }
             next();
+        };
+        this.LoadRoutes = function (data) {
+            _this.data = data;
+            _this.routes = _this.data.files
+                .filter(function (file) { return route_types_const_1.RouteTypes.indexOf(file.type) > -1; })
+                .reduce(function (a, b) {
+                var name = "/" + b.name;
+                if (b.type == 'html' && _this.data.config.dropHtmlSuffix) {
+                    name = _this.utils.RemoveExtension(name, 'html');
+                }
+                if (b.type == 'html' && _this.data.config.htmlRoot) {
+                    name = name.replace(_this.data.config.htmlRoot, '');
+                }
+                if (!!a[name])
+                    throw new Error("Shaman Router: route already exists - " + name);
+                var route = _this.CreateRoute(name, b);
+                a[name] = _this.ApplyHeaders(route);
+                return a;
+            }, {});
+        };
+        this.LoadDynamicRoutes = function () {
+            if (_this.data.config.dynamicRoutePlugin)
+                _this.data.config.dynamicRoutePlugin(_this);
+        };
+        this.LoadDynamicRoute = function (route, view, data) {
+            route = "" + (route.substring(0, 1) == '/' ? '' : '/') + route;
+            if (_this.routes[route])
+                throw new Error("Shaman Router: route already exists - " + route);
+            var file = _this.data.files.find(function (f) { return f.name == view; });
+            if (!file)
+                throw new Error("Shaman Router: could not find dynamic view - " + view);
+            var compiler = _this.handlebars.compile(file.contents);
+            file.contents = compiler({ compiler: data, model: _this.MergeDynamicModel(file, data) });
+            var routeData = _this.CreateRoute(route, file);
+            routeData = _this.ApplyHeaders(routeData);
+            _this.routes[route] = routeData;
+        };
+        this.RegenerateRoutes = function (data) {
+            _this.LoadRoutes(data);
+            _this.LoadDynamicRoutes();
+            _this.GenerateSitemap();
+        };
+        this.GenerateSitemap = function () {
+            if (!_this.data.config.sitemap)
+                return;
+            var sitemap = _this.sitemapFactory.GenerateSitemap(_this.data.config.sitemap, _this.routes);
+            var file = {
+                name: 'sitemap.xml',
+                contents: sitemap,
+                type: 'xml'
+            };
+            var route = _this.CreateRoute('/sitemap.xml', file);
+            _this.routes['/sitemap.xml'] = route;
         };
         this.CreateRoute = function (name, file) {
             var content = file.contents;
@@ -123,19 +141,6 @@ var ShamanRouter = /** @class */ (function () {
             res.writeHead(200, { 'Content-Type': route.mimeType });
             res.write(route.content);
             res.end();
-        };
-        this.LoadDynamicRoute = function (route, view, data) {
-            route = "" + (route.substring(0, 1) == '/' ? '' : '/') + route;
-            if (_this.routes[route])
-                throw new Error("Shaman Router: route already exists - " + route);
-            var file = _this.data.files.find(function (f) { return f.name == view; });
-            if (!file)
-                throw new Error("Shaman Router: could not find dynamic view - " + view);
-            var compiler = _this.handlebars.compile(file.contents);
-            file.contents = compiler({ compiler: data, model: _this.MergeDynamicModel(file, data) });
-            var routeData = _this.CreateRoute(route, file);
-            routeData = _this.ApplyHeaders(routeData);
-            _this.routes[route] = routeData;
         };
         this.MergeDynamicModel = function (file, data) {
             var keys = Object.keys(file.data);

@@ -65,7 +65,7 @@ export class Compiler {
         this.onCompileEnd({ data: data, router: this.shamanRouter });
       });
     } else {
-      this.shamanRouter.LoadRoutes(data);
+      this.shamanRouter.RegenerateRoutes(data);
       let update = this.WriteFilesToDisk(this.shamanRouter);
       update.then(() => { console.log('Routes successfully updated!'); })
       update.catch((ex) => { console.log(`An error occured while updating routes: ${ex.message}`); })
