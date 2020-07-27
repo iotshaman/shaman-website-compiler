@@ -1,12 +1,6 @@
-node_modules
-shaman-website-compiler-*.tgz
-dist/**/*.spec.js 
-dist/**/*.spec.js.map
-debug
-coverage
 .nyc_output
-app/config/*config.json
-**/*.log
-.vscode
-sample
-sample-output
+coverage
+dist
+node_modules
+*.tgz
+.coveralls.yml

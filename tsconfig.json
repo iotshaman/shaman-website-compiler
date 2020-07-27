@@ -4,19 +4,18 @@
     "lib": ["es6", "dom"],
     "module": "commonjs",
     "outDir": "dist",
+    "declaration": true,
     "sourceMap": true,
     "noImplicitAny": false,
-    "types": ["reflect-metadata"],
+    "types": [
+      "node"
+    ],
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "typeRoots": [
-      "node_modules/@types",
-      "typings"
+      "node_modules/@types"
     ]
   },
-  "files": [
-    "./node_modules/@types/node/index.d.ts"
-  ],
   "include": [
     "src/**/*.ts"
   ],

@@ -1,1 +1,0 @@
-exports.CompilerFactory = require('./dist/compiler/compiler.factory').CompilerFactory;
