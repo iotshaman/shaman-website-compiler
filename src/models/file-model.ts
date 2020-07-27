@@ -8,7 +8,7 @@ export class FileModel {
 }
 
 export class FileModelConfig {
-  dynamic?: { path: string, key: string };
+  dynamic?: { path: string, name: string };
   query?: QueryModel[];
   bundles?: Bundle[];
 }

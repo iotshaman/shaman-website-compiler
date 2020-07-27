@@ -104,7 +104,7 @@ describe('HtmlContentHandler', () => {
       let stub = logger.log = sandbox.stub();
       handlebarsService.renderTemplate = sandbox.stub().returns('<html>\r\n</html>');
       let file = new FileData('sample.html', './sample.html'); 
-      file.model = { shaman: { dynamic: { path: '', key: '' }, query: [] } };
+      file.model = { shaman: { dynamic: { path: '', name: '' }, query: [] } };
       subject.processEvent(file).then(_ => {
         let logLevel = stub.getCall(0).args[1];
         expect(logLevel).to.equal(1);
@@ -121,7 +121,7 @@ describe('HtmlContentHandler', () => {
       handlebarsService.renderTemplate = sandbox.stub().returns('<html>\r\n</html>');
       let file = new FileData('sample.html', './sample.html'); 
       let query = new QueryModel(); query.dynamic = true;
-      file.model = { shaman: { dynamic: { path: '', key: '' }, query: [query] } };
+      file.model = { shaman: { dynamic: { path: '', name: '' }, query: [query] } };
       subject.processEvent(file).then(_ => {
         let logLevel = stub.getCall(0).args[1];
         expect(logLevel).to.equal(1);
@@ -139,7 +139,7 @@ describe('HtmlContentHandler', () => {
       sandbox.stub(subject, 'minify').returns('<html></html>')
       let file = new FileData('sample.html', './sample.html'); 
       let query = new QueryModel(); query.dynamic = true;
-      file.model = { shaman: { dynamic: { path: '', key: 'title' }, query: [query] } };
+      file.model = { shaman: { dynamic: { path: '', name: 'title' }, query: [query] } };
       subject.processEvent(file).then(_ => {
         let route = context.models.dynamicRoutes.find('a.html');
         expect(route.content).to.equal('<html></html>');

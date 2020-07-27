@@ -52,7 +52,7 @@ export class HtmlContentHandler extends EventHandler {
   private processDynamicFile = (file: FileData, model: any): void => {
     const options = this.minifyOptions;
     const path = file.model.shaman.dynamic.path;
-    const key = file.model.shaman.dynamic.key;
+    const key = file.model.shaman.dynamic.name;
     let route = new DynamicRoute();
     route.path = `${path}${model[key]}`;
     route.file = file.name;
