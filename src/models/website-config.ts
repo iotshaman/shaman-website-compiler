@@ -1,6 +1,5 @@
 import { injectable } from "inversify";
 import { AdapterConfig } from "./adapter-config";
-import { IQueryAdapter } from "../adapters";
 
 export interface IWebsiteConfig {
   root?: string;
@@ -65,7 +64,7 @@ export class WebsiteConfig {
 
   private get defaultAdapter(): AdapterConfig {
     let config = new AdapterConfig();
-    config.module = 'shaman-factory';
+    config.module = 'shaman-website-compiler';
     config.name = 'JsonRepoAdapter';
     config.configuration = { dataPath: null, models: [] };
     return config;
