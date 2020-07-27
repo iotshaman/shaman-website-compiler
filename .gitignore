@@ -1,19 +1,6 @@
-# Custom Ignores #
-##################
+.nyc_output
+coverage
+dist
 node_modules
-node_modules/*
-.vscode
-.vscode/*
-shaman-website-compiler-*.tgz
-dist/**/*.spec.js 
-dist/**/*.spec.js.map
+*.tgz
 .coveralls.yml
-coverage/
-coverage/*
-scripts/debug.js
-dynamicSample
-dynamicSample/*
-sample/dist
-sample/dist/*
-sample2
-sample2/*

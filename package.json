@@ -1,41 +1,68 @@
 {
   "name": "shaman-website-compiler",
-  "version": "2.1.2",
-  "description": "Generate website scaffolding in seconds. Compile to output with the CLI or compile to Express JS routes with Node JS. Built with SEO in mind.",
-  "main": "scripts/index.js",
+  "version": "4.0.1",
+  "description": "Build high-quality websites with minimal effort. Just start designing!",
+  "main": "dist/index.js",
+  "typings": "public_api.d.ts",
+  "private": true,
   "scripts": {
-    "start": "tsc && node scripts/index.js",
+    "test": "nyc mocha",
     "build": "tsc",
-    "watch": "tsc -w",
-    "test": "karma start --single-run",
-    "test-watch": "karma start",
-    "test-travis": "./node_modules/.bin/karma start karma.travis.conf.js --single-run"
+    "coveralls": "nyc report --reporter=text-lcov | coveralls"
   },
   "author": "Kyle Brown",
   "license": "ISC",
   "dependencies": {
-    "clean-css": "^4.1.11",
-    "fast-glob": "2.2.2",
-    "fs-extra": "7.0.0",
-    "gaze": "1.1.3",
-    "handlebars": "4.0.11",
-    "node-object-hash": "1.4.1",
-    "promise": "8.0.1",
-    "uglify-es": "3.3.9"
+    "clean-css": "^4.2.3",
+    "fast-glob": "^3.2.4",
+    "fs-extra": "^9.0.1",
+    "gaze": "^1.1.3",
+    "handlebars": "^4.7.6",
+    "html-minifier": "^4.0.0",
+    "inversify": "^5.0.1",
+    "json-repo": "^1.2.2",
+    "moment": "^2.27.0",
+    "mongodb": "^3.5.9",
+    "reflect-metadata": "^0.1.13",
+    "sitemap": "^6.1.7",
+    "uglify-es": "^3.3.9",
+    "upath": "1.2.0"
   },
   "devDependencies": {
-    "@types/fs-extra": "5.0.4",
-    "@types/jasmine": "2.8.8",
-    "@types/node": "^8.0.53",
-    "jasmine": "3.1.0",
-    "jasmine-core": "3.1.0",
-    "karma": "2.0.5",
-    "karma-coverage": "1.1.2",
-    "karma-coveralls": "2.0.0",
-    "karma-jasmine": "1.1.2",
-    "karma-phantomjs-launcher": "1.0.4",
-    "karma-spec-reporter": "0.0.32",
-    "karma-typescript": "3.0.13",
-    "typescript": "^2.6.1"
+    "@types/chai": "^4.2.11",
+    "@types/clean-css": "4.2.2",
+    "@types/fs-extra": "^9.0.1",
+    "@types/html-minifier": "3.5.2",
+    "@types/mocha": "^7.0.2",
+    "@types/mongodb": "^3.5.25",
+    "@types/node": "^14.0.14",
+    "@types/sinon": "9.0.4",
+    "@types/uglify-es": "3.0.0",
+    "chai": "^4.2.0",
+    "coveralls": "^3.1.0",
+    "mocha": "^8.0.1",
+    "nyc": "^15.1.0",
+    "sinon": "^9.0.2",
+    "ts-auto-mock": "^2.3.3",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.5"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "**/*.d.ts",
+      "**/*.spec.ts",
+      "**/*.js",
+      "**/models/*.ts",
+      "**/composition/*.ts",
+      "**/data/*.ts"
+    ],
+    "reporter": [
+      "html",
+      "lcov"
+    ],
+    "all": true
   }
 }
