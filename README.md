@@ -156,15 +156,15 @@ Configuration settings are entirely optional, and each property has a default va
 |`logLevel`|string|"info"|Set log level ("error", "warn", "info", "debug", "silly").
 |`production`|boolean|false|When true, files will be minified and bundles injected. When false, a development server will be started and bundles will be expanded, when injected.
 |`pages`|string[]|["\*\*/\*.html", "!\*\*/\*.partial.html"]|Glob pattern to locate HTML files.
-|`partials`|string[]|["\*\*/\*.partial.html"]|Glob pattern to locate handlebars "partial" files (see ""Handlebars Partials").
-|`helpers`|string[]|["\*\*/\*.helper.js"]|Glob pattern to locate handlerbars "helpers" (see "Handlebars Helpers").
+|`partials`|string[]|["\*\*/\*.partial.html"]|Glob pattern to locate handlebars "partial" files (see [Handlebars Partials](#handlebars-partials)).
+|`helpers`|string[]|["\*\*/\*.helper.js"]|Glob pattern to locate handlerbars "helpers" (see [Handlebars Helpers](#handlebars-helpers)).
 |`scripts`|string[]|["\*\*/\*.js", "!\*\*/\*.helper.js"]|Glob pattern to find javascript files.
 |`styles`|string[]|["\*\*/\*.css"]|Glob pattern to find css files.
-|`assets`|string[]|See "Building Asset Files"|Glob pattern to find asset files.
+|`assets`|string[]|See [Building Asset Files](#building-asset-files)|Glob pattern to find asset files.
 |`output`|string|null|Folder path (relative or absolute) to output compiled files.
 |`serve`|boolean|true|Turn off development server when not in production.
-|`sitemap`|custom|default|See "Sitemap Generation"
-|`adapter`|custom|default|See "Database Adapters"
+|`sitemap`|custom|default|See [Sitemap Generation](#sitemap-generation)
+|`adapter`|custom|default|See [Database Adapters](#database-adapters)
 
 ## Templating Engine
 
@@ -235,11 +235,11 @@ A dynamic file allows you to use 1 template to create multiple pages. To create 
 - **path:** URL path for the file (for example, "blog/").
 - **name:** The name of the property in your query results that represents your URL (filename). For example, if you have a query that returns blog objects, and each blog object has a property called "routeUrl", you could use this for the "name" property. When the compiler runs, each blog item would create a new HTML page with the URL (filename) matching the value in "routeUrl". 
  
-Finally, add a query (see "Database Queries") to your file model's "shaman.query" array, and set the "dynamic" property on the query to "true".
+Finally, add a query (see [Database Queries](#database-queries)) to your file model's "shaman.query" array, and set the "dynamic" property on the query to "true".
 
 ### Database Queries
 
-Your file model can define as many queries as you would like. This requires you to have configured a database adapter (see "Database Adapters"), and to have an existing storage solution, like a [json-repo](https://www.npmjs.com/package/json-repo) or Mongo DB. Once you have configured your database adapter, you can create queries. Below is the interface for queries (please note, each query adapter has different requirements for how to use these properties):
+Your file model can define as many queries as you would like. This requires you to have configured a database adapter (see [Database Adapters](#database-adapters)), and to have an existing storage solution, like a [json-repo](https://www.npmjs.com/package/json-repo) or Mongo DB. Once you have configured your database adapter, you can create queries. Below is the interface for queries (please note, each query adapter has different requirements for how to use these properties):
 
 ```ts
 export interface IQueryModel {
@@ -252,7 +252,7 @@ export interface IQueryModel {
 }
 ```
 
-For example, here is a json-repo query (see "Database Adapters -> Json Repo") to fetch the last 10 newest blogs, and the HTML code to display it:
+For example, here is a json-repo query (see [Json Repository Adapter](#json-repository-adapter)) to fetch the last 10 newest blogs, and the HTML code to display it:
 
 **sample.json**
 ```js
