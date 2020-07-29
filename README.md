@@ -122,7 +122,7 @@ Congratulations, you are now up and running with your awesome new website! This 
 
 ## Application Configuration
 
-Application configuration is managed in the "factory.json" file, in your project's root folder. While you can technically store this configuration anywhere, by using "factory.json" as your configuraiton file you will be able to leverage other tooling (coming soon). 
+Application configuration is managed in the "factory.json" file, in your project's root folder. While you can technically store this configuration anywhere, by using "factory.json" as your configuration file you will be able to leverage other tooling (coming soon). 
 
 ```ts
 export interface IWebsiteConfig {
@@ -232,14 +232,14 @@ export interface IFileModelConfig {
 
 A dynamic file allows you to use 1 template to create multiple pages. To create a dynamic file template, first create an HTML page with your core template, then add a file model. Next, in your file model's "shaman.dynamic" property, add an object that contains a "path" and a "name" property
 
-- **path:** URL path for the fie (for example, "blog/").
+- **path:** URL path for the file (for example, "blog/").
 - **name:** The name of the property in your query results that represents your URL (filename). For example, if you have a query that returns blog objects, and each blog object has a property called "routeUrl", you could use this for the "name" property. When the compiler runs, each blog item would create a new HTML page with the URL (filename) matching the value in "routeUrl". 
  
 Finally, add a query (see "Database Queries") to your file model's "shaman.query" array, and set the "dynamic" property on the query to "true".
 
 ### Database Queries
 
-Your file model can define as many queries as you would like. This requires you to have configured a database adapter (see "Database Adapters"), and to have an existing storage solution, like a [json-repo](https://www.npmjs.com/package/json-repo) or Mongo DB. Once you have configured your database adapter, you can create queries. Below is the interface for queries (please not, each query adapter has different requirements for how to use these properties):
+Your file model can define as many queries as you would like. This requires you to have configured a database adapter (see "Database Adapters"), and to have an existing storage solution, like a [json-repo](https://www.npmjs.com/package/json-repo) or Mongo DB. Once you have configured your database adapter, you can create queries. Below is the interface for queries (please note, each query adapter has different requirements for how to use these properties):
 
 ```ts
 export interface IQueryModel {
@@ -326,13 +326,22 @@ For example, if you wanted to bundle 2 CSS files that are specific to your "samp
 
 **Note:** When in development mode (factory.json "production = false") your bundles will be generated, but will actually create individual links for each style sheet; this is to help with debugging using developer tools in your browser of choice.
 
+**Note:** To access another file model's bundle, the Shaman Website Compiler has a special handlers helpers:
+
+```html
+<head>
+  {{{style 'name-of-exported-bundle.css'}}}
+  {{{script 'name-of-exported-bundle.js'}}}
+</head>
+```
+
 ## Database Adapters
 
-If you are simply developing a static website, you probably have no need for a database. However, for more sophisticated, dynamic websites, you will typically need something to store persistent data. The Shaman Website Compiler takes an agnostic approach to persistent storage, using the concept of a *database adapter* to abstract database communication. Instead of having to worry about writing code to connect to and manage your database, you can simply configure a database adapter in your 'factory.json' file and add configure your queries in individual file models. 
+If you are simply developing a static website, you probably have no need for a database. However, for more sophisticated, dynamic websites, you will typically need something to store persistent data. The Shaman Website Compiler takes an agnostic approach to persistent storage, using the concept of a *database adapter* to abstract database communication. Instead of having to worry about writing code to connect to and manage your database, you can simply configure a database adapter in your 'factory.json' file and configure your queries in individual file models. 
 
-There are 3 built-in database adapters (json-repo, http, and mongo-db) which you can use with minimal configuraiton. If these built-in adapters do not cover all of your requirements, or you need to use a persistence solution not alredy built-in, you can create your own implementation of a database adapter and configure it with ease. 
+There are 3 built-in database adapters (json-repo, http, and mongo-db) which you can use with minimal configuration. If these built-in adapters do not cover all of your requirements, or you need to use a persistence solution not already built-in, you can create your own implementation of a database adapter and configure it with ease. 
 
-Each database adapter implements the below interface; to add your own custom adapter, simply create and implementation of the interface.
+Each database adapter implements the below interface; to add your own custom adapter, simply create an implementation of the interface.
 
 ```ts
 export interface IQueryAdapter {
@@ -343,7 +352,7 @@ export interface IQueryAdapter {
 
 ### Configuring an Adapter
 
-In order to create queries in your file models, you will need to configure your data adapter. The 'factory.json' file has an 'adapter' property that accepts the below interface:
+In order to use queries in your file models, you will need to configure your data adapter. The 'factory.json' file has an 'adapter' property that accepts the below interface:
 
 ```ts
 export interface IAdapterConfig {
@@ -359,7 +368,7 @@ export interface IAdapterConfig {
 
 ### Json Repository Adapter
 
-The json repo adapter allows you to use a local JSON file as your data source, and can be used to create dynamic pages, without having to connect to any external databases. When configuring the json repo adatper in your 'factory.json' file, use the "name" value of "JsonRepoAdapter". 
+The json repo adapter allows you to use a local JSON file as your data source, and can be used to create dynamic pages, without having to connect to any external databases. When configuring the json repo adatper in your 'factory.json' file, use the *name* value of "JsonRepoAdapter". 
 
 The json repo adapter takes a configuration object with the below interface:
 
@@ -407,13 +416,13 @@ To configure queries for a json-repo database, use the IQueryModel interface and
 
 - **name:** This is the name you will use in your HTML template to refer to this query's result set.
 - **path:** The name of the model you are querying
-- **args:** Takes 1-2 arguments. If you provide "*" it will return all objects. If you wish to filter these objects by a property, pass the name of the property in the first argument, then the expected value as the second argument. For example, to filter blogs to only the ones where the property "tag" equals "technology", your "args" property would look like ["tag","technology"].
+- **args:** Takes 1-2 arguments. If you provide "*" it will return all objects. If you wish to filter these objects by a property, pass the name of the property in the first argument, then the expected value as the second argument. For example, to filter blogs to only the ones where the property "tag" equals "technology", your "args" property would look like `["tag","technology"]`.
 - **limit:** Only returns the top *n* elements from the result set. This should be used in conjunction with "sort".
 - **sort:** Sorts the result set, based on a "key" (name of property). Use the "descending" property if you want to reverse the order.
 
-### HTTP Adapter
+### Http Adapter
 
-The HTTP adapter allows you to use make HTTP requests to fulfil query requests. If you have an existing RESTful API and want to use this data to populate your website, this is the adapter for your. When configuring the HTTP adatper in your 'factory.json' file, use the "name" value of "HttpAdapter". 
+The HTTP adapter allows you to make HTTP requests to fulfil query requests. If you have an existing RESTful API and want to use this data to populate your website, this is the adapter for your. When configuring the HTTP adatper in your 'factory.json' file, use the *name* value of "HttpAdapter". 
 
 The HTTP adapter takes a configuration object with the below interface:
 
@@ -433,7 +442,7 @@ To configure queries for a RESTful API, use the IQueryModel interface and follow
 
 ### Mongo Adapter
 
-The mongo adapter allows you to query a mongo database. If you have an existing Mongo DB database and want to use this data to populate your website, this is the adapter for your. When configuring the mongo adatper in your 'factory.json' file, use the "name" value of "MongoAdapter".
+The mongo adapter allows you to query a mongo database. If you have an existing Mongo DB database and want to use this data to populate your website, this is the adapter for your. When configuring the mongo adatper in your 'factory.json' file, use the *name* value of "MongoAdapter".
 
 The mongo adapter takes a configuration object with the below interface:
 
