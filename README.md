@@ -463,3 +463,25 @@ To configure queries for a Mongo DB database, use the IQueryModel interface and 
 - **args:** This argument takes a mongo query object, represented in JSON, which will be passed to the "collection.find" mongo request. For example, to find all blogs with the "tag" value of "technology", you could use `{"tag": "technology"}`.
 - **limit:** Only returns the top *n* elements from the result set. This should be used in conjunction with "sort".
 - **sort:** Sorts the result set, based on a "key" (name of property). Use the "descending" property if you want to reverse the order.
+
+## Sitemap Generation
+
+Every time you build your website the compiler will gather all URLs for your website and generate a sitemap. By default, the sitemap generator will use "http://localhost:3000" as the hostname; however, you can configure this in your 'factory.json' file. Below is the interface for sitemap configuration:
+
+```ts
+export interface ISitemapConfig {
+  hostname: string;
+}
+```
+
+## Building Asset Files
+
+Every website has files that dont fall into the category of source code; these files are often called *assets*. For example, almost every website will have images of some kind, and probably a 'robots.txt' file. The 'factory.json' configuration file provides a property, "assets", that allows you to specify what kinds of asset files should be included in the build output. By default, the following files are included:
+
+- PNG
+- SVG
+- JPG / JPEG
+- ICO
+- TXT
+
+To change this, simply provide an array of glob patterns to the "assets" property in your 'factory.json' file. For example, to include all "mp4" and "png" asset files, you would use the following value: `["**/*.mp4","**/*.png"]`.

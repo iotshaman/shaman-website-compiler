@@ -1,6 +1,6 @@
 {
   "name": "shaman-website-compiler",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "description": "Build high-quality websites with minimal effort. Just start designing!",
   "main": "dist/index.js",
   "typings": "public_api.d.ts",

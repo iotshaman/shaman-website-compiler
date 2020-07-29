@@ -59,7 +59,8 @@ export class WebsiteConfig {
     "**/*.svg", 
     "**/*.ico", 
     "**/*.jpg",
-    "**/*.jpeg"
+    "**/*.jpeg",
+    "**/*.txt"
   ]
 
   private get defaultAdapter(): AdapterConfig {
