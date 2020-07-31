@@ -30,7 +30,7 @@ npm install shaman-website-compiler --save
 
 #### Configuring the Website Compiler
 
-The website compiler requires a configuration file to operate properly, so the first thing we need to do is generate this file. Create a file in your project folder called 'factory.json' and add the following text:
+The website compiler requires a configuration file to operate properly, so the first thing we need to do is generate this file. Create a file in your project folder called 'website.json' and add the following text:
 
 ```js
 {
@@ -45,7 +45,7 @@ Once we have a configration file, we need a javascript file to import the Shaman
 let WebsiteFactory = require('shaman-website-compiler').WebsiteFactory;
 
 // Configuring compiler
-let config = require('./factory.json');
+let config = require('./website.json');
 let website = WebsiteFactory(config);
 
 // Building sample website
@@ -77,7 +77,7 @@ my-website
 |___ src/
     |-- index.html
     |-- index.json
-|-- factory.json
+|-- website.json
 |-- index.js
 |-- package.json
 ```
@@ -122,7 +122,7 @@ Congratulations, you are now up and running with your awesome new website! This 
 
 ## Application Configuration
 
-Application configuration is managed in the "factory.json" file, in your project's root folder. While you can technically store this configuration anywhere, by using "factory.json" as your configuration file you will be able to leverage other tooling (coming soon). 
+Application configuration is managed in the "website.json" file, in your project's root folder. While you can technically store this configuration anywhere, by using "website.json" as your configuration file you will be able to leverage other tooling (coming soon). 
 
 ```ts
 export interface IWebsiteConfig {
@@ -172,7 +172,7 @@ The Shaman Website Compiler comes with [handlebars](https://handlebarsjs.com/) t
 
 ### Handlebars Helpers
 
-The default method of adding custom handlebars helpers to your website is to create a file with the extension ".helper.js" in your project's source folder (default "./src"); this can be configured in your factory.json file. Below is a sample helper file:
+The default method of adding custom handlebars helpers to your website is to create a file with the extension ".helper.js" in your project's source folder (default "./src"); this can be configured in your website.json file. Below is a sample helper file:
 
 ```js
 handlebars.registerHelper('date', function(date, format) {
@@ -185,7 +185,7 @@ Each helper file has access to 2 global objects (handlers.js and moment.js), and
 
 ### Handlebars Partials
 
-The default method of adding "partial" html files is to create a file with the extension ".partial.html" in your projects source folder (default "./src"); this can be configured in your factory.json file. Below is an example partial file:
+The default method of adding "partial" html files is to create a file with the extension ".partial.html" in your projects source folder (default "./src"); this can be configured in your website.json file. Below is an example partial file:
 
 ```html
 <!-- filename: title.partial.html -->
@@ -324,9 +324,9 @@ For example, if you wanted to bundle 2 CSS files that are specific to your "samp
 </head>
 ```
 
-**Note:** When in development mode (factory.json "production = false") your bundles will be generated, but will actually create individual links for each style sheet; this is to help with debugging using developer tools in your browser of choice.
+**Note:** When in development mode (website.json "production = false") your bundles will be generated, but will actually create individual links for each style sheet; this is to help with debugging using developer tools in your browser of choice.
 
-**Note:** To access another file model's bundle, the Shaman Website Compiler has a special handlers helpers:
+**Note:** To access another file model's bundle, the Shaman Website Compiler has 2 special handlebars helpers, 'style' and 'script'. Below is an example implementation:
 
 ```html
 <head>
@@ -337,7 +337,7 @@ For example, if you wanted to bundle 2 CSS files that are specific to your "samp
 
 ## Database Adapters
 
-If you are simply developing a static website, you probably have no need for a database. However, for more sophisticated, dynamic websites, you will typically need something to store persistent data. The Shaman Website Compiler takes an agnostic approach to persistent storage, using the concept of a *database adapter* to abstract database communication. Instead of having to worry about writing code to connect to and manage your database, you can simply configure a database adapter in your 'factory.json' file and configure your queries in individual file models. 
+If you are simply developing a static website, you probably have no need for a database. However, for more sophisticated, dynamic websites, you will typically need something to store persistent data. The Shaman Website Compiler takes an agnostic approach to persistent storage, using the concept of a *database adapter* to abstract database communication. Instead of having to worry about writing code to connect to and manage your database, you can simply configure a database adapter in your 'website.json' file and configure your queries in individual file models. 
 
 There are 3 built-in database adapters (json-repo, http, and mongo-db) which you can use with minimal configuration. If these built-in adapters do not cover all of your requirements, or you need to use a persistence solution not already built-in, you can create your own implementation of a database adapter and configure it with ease. 
 
@@ -352,7 +352,7 @@ export interface IQueryAdapter {
 
 ### Configuring an Adapter
 
-In order to use queries in your file models, you will need to configure your data adapter. The 'factory.json' file has an 'adapter' property that accepts the below interface:
+In order to use queries in your file models, you will need to configure your data adapter. The 'website.json' file has an 'adapter' property that accepts the below interface:
 
 ```ts
 export interface IAdapterConfig {
@@ -368,7 +368,7 @@ export interface IAdapterConfig {
 
 ### Json Repository Adapter
 
-The json repo adapter allows you to use a local JSON file as your data source, and can be used to create dynamic pages, without having to connect to any external databases. When configuring the json repo adatper in your 'factory.json' file, use the *name* value of "JsonRepoAdapter". 
+The json repo adapter allows you to use a local JSON file as your data source, and can be used to create dynamic pages, without having to connect to any external databases. When configuring the json repo adatper in your 'website.json' file, use the *name* value of "JsonRepoAdapter". 
 
 The json repo adapter takes a configuration object with the below interface:
 
@@ -422,7 +422,7 @@ To configure queries for a json-repo database, use the IQueryModel interface and
 
 ### Http Adapter
 
-The HTTP adapter allows you to make HTTP requests to fulfil query requests. If you have an existing RESTful API and want to use this data to populate your website, this is the adapter for your. When configuring the HTTP adatper in your 'factory.json' file, use the *name* value of "HttpAdapter". 
+The HTTP adapter allows you to make HTTP requests to fulfil query requests. If you have an existing RESTful API and want to use this data to populate your website, this is the adapter for your. When configuring the HTTP adatper in your 'website.json' file, use the *name* value of "HttpAdapter". 
 
 The HTTP adapter takes a configuration object with the below interface:
 
@@ -442,7 +442,7 @@ To configure queries for a RESTful API, use the IQueryModel interface and follow
 
 ### Mongo Adapter
 
-The mongo adapter allows you to query a mongo database. If you have an existing Mongo DB database and want to use this data to populate your website, this is the adapter for your. When configuring the mongo adatper in your 'factory.json' file, use the *name* value of "MongoAdapter".
+The mongo adapter allows you to query a mongo database. If you have an existing Mongo DB database and want to use this data to populate your website, this is the adapter for your. When configuring the mongo adatper in your 'website.json' file, use the *name* value of "MongoAdapter".
 
 The mongo adapter takes a configuration object with the below interface:
 
@@ -466,7 +466,7 @@ To configure queries for a Mongo DB database, use the IQueryModel interface and 
 
 ## Sitemap Generation
 
-Every time you build your website the compiler will gather all URLs for your website and generate a sitemap. By default, the sitemap generator will use "http://localhost:3000" as the hostname; however, you can configure this in your 'factory.json' file. Below is the interface for sitemap configuration:
+Every time you build your website the compiler will gather all URLs for your website and generate a sitemap. By default, the sitemap generator will use "http://localhost:3000" as the hostname; however, you can configure this in your 'website.json' file. Below is the interface for sitemap configuration:
 
 ```ts
 export interface ISitemapConfig {
@@ -476,7 +476,7 @@ export interface ISitemapConfig {
 
 ## Building Asset Files
 
-Every website has files that dont fall into the category of source code; these files are often called *assets*. For example, almost every website will have images of some kind, and probably a 'robots.txt' file. The 'factory.json' configuration file provides a property, "assets", that allows you to specify what kinds of asset files should be included in the build output. By default, the following files are included:
+Almost every website has files that don't fall into the category of source code; these files are often called *assets*. For example, websites will tpically have images of some kind, and probably a 'robots.txt' file. The 'website.json' configuration file provides a property, "assets", that allows you to specify what kinds of asset files should be included in the build output. By default, the following files are included:
 
 - PNG
 - SVG
@@ -484,4 +484,4 @@ Every website has files that dont fall into the category of source code; these f
 - ICO
 - TXT
 
-To change this, simply provide an array of glob patterns to the "assets" property in your 'factory.json' file. For example, to include all "mp4" and "png" asset files, you would use the following value: `["**/*.mp4","**/*.png"]`.
+To change this, simply provide an array of glob patterns to the "assets" property in your 'website.json' file. For example, to include all "mp4" and "png" asset files, you would use the following value: `["**/*.mp4","**/*.png"]`.
