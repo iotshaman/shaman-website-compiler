@@ -2,7 +2,7 @@
 
 ![npm badge](https://img.shields.io/npm/v/shaman-website-compiler.svg) ![Build Status](https://travis-ci.org/iotshaman/shaman-website-compiler.svg?branch=master) [![Coverage Status](https://coveralls.io/repos/github/iotshaman/shaman-website-compiler/badge.svg?branch=master)](https://coveralls.io/github/iotshaman/shaman-website-compiler?branch=master)
 
-### Build high quality websites with minimal effort. Just start designing!
+### Compile raw HTML, CSS and Javascript into the smallest possible, SEO friendly website.
 
 Build high-quality websites that are SEO-friendly and blazing fast, without all the annoying configuration, minfication, bundling, etc. With Shaman Website Compiler you get all of these features, and more, with a simple configuration file. Some of the features include
 
