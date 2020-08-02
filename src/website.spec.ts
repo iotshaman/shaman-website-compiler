@@ -32,6 +32,7 @@ describe('WebsiteRouter', () => {
     IoC.bind<IWebsiteServer>(TYPES.WebsiteServer).toConstantValue(<any>server);
     IoC.bind<IEventService>(TYPES.CompilerEvents).toConstantValue(new EventService());
     IoC.bind<ILogger>(TYPES.Logger).toConstantValue(createMock<ILogger>());
+    sandbox.stub(_fsx, 'ensureFile').returns(<any>Promise.resolve());
   });
 
   afterEach(() => {

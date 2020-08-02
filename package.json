@@ -1,6 +1,6 @@
 {
   "name": "shaman-website-compiler",
-  "version": "4.0.5",
+  "version": "4.0.6",
   "description": "Compile raw HTML, CSS and Javascript into the smallest possible, SEO friendly website.",
   "main": "dist/index.js",
   "typings": "public_api.d.ts",

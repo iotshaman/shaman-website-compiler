@@ -45,7 +45,7 @@ export class Website {
     if (!this.config.output) return Promise.resolve(routes);
     let operations = routes.map(route => {
       let path = _path.join(this.config.output, route.path);
-      return _fsx.outputFile(path, route.content);
+      return _fsx.ensureFile(path).then(_ => _fsx.outputFile(path, route.content));
     });
     let assets = this.context.models.assets.filter(a => !!a)
     operations = operations.concat(assets.map(asset => {
