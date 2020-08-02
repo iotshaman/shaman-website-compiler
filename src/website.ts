@@ -14,7 +14,8 @@ export class Website {
 
   gaze = _gaze;
   routes: Route[];
-  private config: WebsiteConfig;
+  get config(): WebsiteConfig { return this._config; }
+  private _config: WebsiteConfig;
   private compiler: WebsiteCompiler;
   private server: IWebsiteServer;
   private context: CompilerDataContext;
@@ -22,7 +23,7 @@ export class Website {
   private logger: ILogger;
 
   constructor() {
-    this.config = IoC.get<WebsiteConfig>(TYPES.WebsiteConfig);
+    this._config = IoC.get<WebsiteConfig>(TYPES.WebsiteConfig);
     this.compiler = IoC.get<WebsiteCompiler>(TYPES.WebsiteCompiler);
     this.server = IoC.get<IWebsiteServer>(TYPES.WebsiteServer);
     this.context = IoC.get<CompilerDataContext>(TYPES.CompilerDataContext);

@@ -24,4 +24,14 @@ describe('ShamanFactory', () => {
     expect(subject instanceof Website).to.be.true;
   });
 
+  it('ShamanFactory should configure application for production', () => {
+    process.argv = [...process.argv.slice(0, 2), "--prod"];
+    let adapter = new AdapterConfig();
+    adapter.module = '../adapters/json-repo.adapter';
+    adapter.name = "JsonRepoAdapter";
+    adapter.configuration = { models: [] };
+    let subject = WebsiteFactory(new WebsiteConfig({adapter}));
+    expect(subject.config.production).to.be.true;
+  });
+
 });
