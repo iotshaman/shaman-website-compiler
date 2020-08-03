@@ -56,6 +56,7 @@ export class HtmlContentHandler extends EventHandler {
     let route = new DynamicRoute();
     route.path = `${path}${model[key]}`;
     route.file = file.name;
+    model.shaman = file.model.shaman;
     route.content = this.handlebarsService.renderTemplate(file, model);
     if (!!this.config.production) route.content = _minify(route.content, options);
     this.context.models.dynamicRoutes.upsert(route.path, route);
