@@ -104,7 +104,7 @@ describe('WebsiteRouter', () => {
     });
   });
 
-  it('server should return index.html file', (done) => {
+  it('server should return sitemap.xml file', (done) => {
     CreateDataContext(IoC).then(_ => {
       let onWrite = (content: string) => {
         expect(content).to.equal('<xml>sitemap.xml</xml>');
@@ -117,6 +117,22 @@ describe('WebsiteRouter', () => {
       sandbox.stub(fs, 'createReadStream').returns(<any>{pipe: (_res) => {}})
       let server = new WebsiteServer();
       let route = new Route('sitemap.xml', '<xml>sitemap.xml</xml>', 'xml');
+      server.start([route]);
+    });
+  });
+
+  it('server should remove query string when looking for route', (done) => {
+    CreateDataContext(IoC).then(_ => {
+      let onWrite = (content: string) => {
+        expect(content).to.equal('<html>index.html</html>');
+        done();
+      }
+      let response = { writeHead: (_a, _b) => {}, end: () => {}, write: onWrite}
+      let stub = sandbox.stub(http, 'createServer')
+      stub = stub.returns(<any>{listen: sandbox.stub()});
+      stub = stub.yields({ url: '/index.html?test=true' }, response);
+      let server = new WebsiteServer();
+      let route = new Route('index.html', '<html>index.html</html>', 'html');
       server.start([route]);
     });
   });

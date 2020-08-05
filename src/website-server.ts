@@ -43,6 +43,7 @@ export class WebsiteServer implements IWebsiteServer {
 
   private handleRequest = (req: IncomingMessage, res: ServerResponse): void => {
     let path = (req.url == "/" ? "/index.html" : req.url).slice(1);
+    if (path.includes('?')) path = path.substring(0, path.indexOf('?'));
     if (this.isAssetRoute(path)) return this.handleAssetRequest(path, res);
     let route = this.routes.find(r => r.path == path);
     if (!route) {
