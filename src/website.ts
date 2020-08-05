@@ -42,17 +42,19 @@ export class Website {
       });
   }
 
-  private outputFiles = (routes: Route[]): Promise<Route[]> => {
+  private outputFiles = (routes: Route[], skipAssets: boolean = false): Promise<Route[]> => {
     if (!this.config.output) return Promise.resolve(routes);
     let operations = routes.map(route => {
       let path = _path.join(this.config.output, route.path);
       return _fsx.ensureFile(path).then(_ => _fsx.outputFile(path, route.content));
     });
     let assets = this.context.models.assets.filter(a => !!a)
-    operations = operations.concat(assets.map(asset => {
-      let path = _path.join(this.config.output, asset.name);
-      return _fsx.copy(asset.path, path);
-    }));
+    if (!skipAssets) {
+      operations = operations.concat(assets.map(asset => {
+        let path = _path.join(this.config.output, asset.name);
+        return _fsx.copy(asset.path, path);
+      }));
+    }
     return Promise.all(operations).then(_ => (routes));
   }
 
@@ -84,7 +86,7 @@ export class Website {
     setTimeout(() => this.eventService.publish('file-added', file));
     return this.context.saveChanges()
       .then(this.compiler.compile)
-      .then(this.outputFiles)
+      .then(routes => this.outputFiles(routes, true))
       .then(routes => {
         this.routes = routes;
         this.server.updateRoutes(routes);
