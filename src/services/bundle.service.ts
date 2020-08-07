@@ -3,6 +3,7 @@ import { IoC, TYPES } from '../composition/app.composition';
 import { WebsiteConfig } from "../models/website-config";
 import { CompilerDataContext } from '../data/compiler.context';
 import { Bundle } from '../models/bundle';
+import { FileData } from '../models';
 
 export interface IBundleService {
   updateBundleContent: () => Promise<void>;
@@ -27,10 +28,16 @@ export class BundleService implements IBundleService {
   }
 
   private getBundleContent = (bundle: Bundle): Bundle => {
-    bundle.content = this.context.models.files
-      .filter(file => bundle.files.includes(file.name))
+    let files = this.context.models.files
+      .filter(file => bundle.files.includes(file.name));
+    bundle.content = this.setBundleOrder(bundle, files)
       .reduce((a, b) => `${a}${b.content}`, '');
     return bundle;
+  }
+
+  private setBundleOrder = (bundle: Bundle, files: FileData[]): FileData[] => {
+    let map = files.reduce((a, b) => { a[b.name] = b; return a }, {});
+    return bundle.files.map(f => map[f]);
   }
 
   private saveBundleContent = (bundle: Bundle): void => {
