@@ -4,7 +4,7 @@ import * as _upath from 'upath';
 import * as _gaze from 'gaze';
 import { IoC, TYPES } from "./composition/app.composition";
 import { WebsiteCompiler } from "./website-compiler";
-import { Route, WebsiteConfig, FileData } from "./models";
+import { Route, WebsiteConfig, FileData, Bundle } from "./models";
 import { IWebsiteServer } from './website-server';
 import { CompilerDataContext } from './data/compiler.context';
 import { ILogger, LogLevels } from './logger';
@@ -98,6 +98,10 @@ export class Website {
     path = _upath.resolve(path);
     let fileName = path.replace(_upath.resolve(this.config.root), "").slice(1);
     return this.context.models.files.find(fileName);
+  }
+
+  getBundleData = (name: string): Bundle => {
+    return this.context.models.bundles.find(name);
   }
 
 }
