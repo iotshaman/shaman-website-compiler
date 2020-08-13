@@ -4,7 +4,7 @@ import * as _upath from 'upath';
 import * as _gaze from 'gaze';
 import { IoC, TYPES } from "./composition/app.composition";
 import { WebsiteCompiler } from "./website-compiler";
-import { Route, WebsiteConfig } from "./models";
+import { Route, WebsiteConfig, FileData } from "./models";
 import { IWebsiteServer } from './website-server';
 import { CompilerDataContext } from './data/compiler.context';
 import { ILogger, LogLevels } from './logger';
@@ -92,6 +92,12 @@ export class Website {
         this.server.updateRoutes(routes);
         this.logger.log(`File updated: ${fileName}`, LogLevels.info);
       });
+  }
+
+  getFileData = (path: string): FileData => {
+    path = _upath.resolve(path);
+    let fileName = path.replace(_upath.resolve(this.config.root), "").slice(1);
+    return this.context.models.files.find(fileName);
   }
 
 }

@@ -11,4 +11,5 @@ export class FileModelConfig {
   dynamic?: { path: string, name: string };
   query?: QueryModel[];
   bundles?: Bundle[];
+  private?: boolean;
 }

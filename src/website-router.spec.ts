@@ -57,11 +57,26 @@ describe('WebsiteRouter', () => {
       })
   });
 
+  it('getAllRoutes should not create route for private.html file', (done) => {
+    CreateDataContext(IoC)
+      .then(addTestFileToContext)
+      .then(addPrivateFileToContext)
+      .then(_ => {
+        let router = new WebsiteRouter();
+        return router.getAllRoutes();
+      })
+      .then(routes => {
+        expect(routes.findIndex(r => r.path == 'private.html')).to.equal(-1);
+        done();
+      })
+  });
+
 });
 
 function addTestFileToContext(context: CompilerDataContext): Promise<CompilerDataContext> {
   let file = new FileData('sample.html', './sample.html'); 
   file.available = true;
+  file.model.shaman;
   context.models.files.add('sample.html', file);
   return context.saveChanges().then(_ => (context));
 }
@@ -78,5 +93,13 @@ function addDynamicRouteToContext(context: CompilerDataContext): Promise<Compile
   route.path = 'dynamic1.html';
   route.content = 'test content';
   context.models.dynamicRoutes.add(route.path, route);
+  return context.saveChanges().then(_ => (context));
+}
+
+function addPrivateFileToContext(context: CompilerDataContext): Promise<CompilerDataContext> {
+  let file = new FileData('private.html', './private.html'); 
+  file.available = true;
+  file.model.shaman = { private: true };
+  context.models.files.add('private.html', file);
   return context.saveChanges().then(_ => (context));
 }

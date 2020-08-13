@@ -225,6 +225,7 @@ export interface IFileModelConfig {
   dynamic?: { path: string, name: string };
   query?: QueryModel[];
   bundles?: Bundle[];
+  private?: boolean;
 }
 ```
 
@@ -334,6 +335,10 @@ For example, if you wanted to bundle 2 CSS files that are specific to your "samp
   {{{script 'name-of-exported-bundle.js'}}}
 </head>
 ```
+
+### Private Files
+
+When you set the 'private' property to true in your file model configuration, you are telling the router to not generate a route for this particular file. This can be helpful if you want to have the contents of the file available to other services, but dont want to output an HTML file. 
 
 ## Database Adapters
 
