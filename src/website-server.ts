@@ -3,7 +3,7 @@ import * as _fs from 'fs';
 import { IncomingMessage, ServerResponse } from 'http';
 import { injectable } from "inversify";
 import { IoC, TYPES } from "./composition/app.composition";
-import { Route } from "./models";
+import { IWebsiteConfig, Route } from "./models";
 import { ILogger, LogLevels } from './logger';
 import { CompilerDataContext } from './data/compiler.context';
 import { GetFileExtension, GetFileMimeType } from './functions/file.functions';
@@ -14,12 +14,11 @@ export interface IWebsiteServer {
   updateRoutes: (routes: Route[]) => void;
 }
 
-const PORT = process.env.PORT || 3000;
-
 @injectable()
 export class WebsiteServer implements IWebsiteServer {
 
   protected routes: Route[];
+  private config: IWebsiteConfig;
   private logger: ILogger;
   private context: CompilerDataContext;
   private _listening: boolean = false;
@@ -27,14 +26,16 @@ export class WebsiteServer implements IWebsiteServer {
 
   constructor() {
     this.logger = IoC.get<ILogger>(TYPES.Logger);
+    this.config = IoC.get<IWebsiteConfig>(TYPES.WebsiteConfig);
     this.context = IoC.get<CompilerDataContext>(TYPES.CompilerDataContext);
   }
 
   start = (routes: Route[]): void => {
     this.updateRoutes(routes);
     this._listening = true;
-    _http.createServer(this.handleRequest).listen(PORT);
-    this.logger.log(`Development server listening on port: ${PORT}`, LogLevels.info);
+    let port = this.config.port;
+    _http.createServer(this.handleRequest).listen(port);
+    this.logger.log(`Development server listening on port: ${port}`, LogLevels.info);
   }
 
   updateRoutes = (routes: Route[]): void => {

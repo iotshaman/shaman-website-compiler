@@ -15,6 +15,7 @@ export interface IWebsiteConfig {
   serve?: boolean;
   sitemap?: SitemapConfig;
   adapter?: AdapterConfig;
+  port?: number;
   handlebars?: (handlebars: any) => void;
 }
 
@@ -34,6 +35,7 @@ export class WebsiteConfig {
   serve?: boolean;
   sitemap?: SitemapConfig;
   adapter?: AdapterConfig;
+  port?: number;
   handlebars?: (handlebars: any) => void;
 
   constructor(config: IWebsiteConfig = {}) {
@@ -51,6 +53,7 @@ export class WebsiteConfig {
     this.sitemap = config.sitemap || { hostname: 'http://localhost:3000/' };
     this.adapter = config.adapter || this.defaultAdapter;
     if (!this.adapter.module) this.adapter.module = this.defaultAdapter.module;
+    this.port = config.port || 3000;
     this.handlebars = config.handlebars || function() {};
   }
 
