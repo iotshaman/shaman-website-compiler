@@ -64,6 +64,20 @@ describe('HttpAdapter', () => {
     });
   });
 
+  it('run (https) should use query.args.name to return object', (done) => {
+    let adapter = new HttpAdapter({apiBaseUri: 'https://localhost/'});
+    let response = { statusCode: 200, on: sandbox.stub() };
+    response.on.withArgs('data').yields('{"products": [{}]}');
+    response.on.withArgs('end').yields(null);
+    sandbox.stub(https, 'get').yields(response);
+    let query = new QueryModel();
+    query.args = {name: 'products'};
+    adapter.run(query).then(result => {
+      expect(result.length).to.equal(1);
+      done();
+    });
+  });
+
   it('run should sort objects in ascending order', (done) => {
     let adapter = new HttpAdapter({apiBaseUri: '/'});
     let response = { statusCode: 200, on: sandbox.stub() };

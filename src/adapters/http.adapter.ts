@@ -20,6 +20,9 @@ export class HttpAdapter implements IQueryAdapter {
 
   run = (query: QueryModel): Promise<any> => {
     return this.httpRequest(query).then(result => {
+      if (!!query.args && !!query.args["name"]) {
+        result = result[query.args["name"]];
+      }
       if (query.sort) result = this.sortEntities(query, result);
       if (query.limit) result = this.limitEntities(query, result);
       return result;
