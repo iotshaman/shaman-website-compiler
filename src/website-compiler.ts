@@ -82,11 +82,14 @@ export class WebsiteCompiler {
       let unavailableFiles = this.context.models.files.filter(f => !f.available);
       return unavailableFiles.length == 0;
     }
-    return new Promise((res) => {
+    let filesAvailableListener = new Promise<void>((res) => {
       if (allFilesAvailable()) res();
       this.eventService.subscribe('file-available', () => {
         if (allFilesAvailable()) res();
       });
+    });
+    return filesAvailableListener.then(_ => {
+      this.eventService.removeAllListeners('file-available');
     });
   }
 

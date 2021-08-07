@@ -104,4 +104,25 @@ export class Website {
     return this.context.models.bundles.find(name);
   }
 
+  reloadHtmlPages = (): Promise<Route[]> => {
+    this.logger.log(`Website rebuild requested.`, LogLevels.info);
+    let pages = this.context.models.files.filter(f => f.extension == 'html');
+    pages.forEach(page => { 
+      page.available = false; 
+      this.context.models.files.update(page.name, f => { 
+        f.available = false; 
+        return f; 
+      });
+    });
+    return this.context.saveChanges()
+      .then(this.compiler.compile)
+      .then(routes => this.outputFiles(routes, true))
+      .then(routes => {
+        this.routes = routes;
+        this.server.updateRoutes(routes);
+        this.logger.log(`Rebuild complete.`, LogLevels.info);
+        return routes;
+      });
+  }
+
 }

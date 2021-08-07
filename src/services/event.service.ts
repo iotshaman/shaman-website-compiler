@@ -4,6 +4,7 @@ import { injectable } from "inversify";
 export interface IEventService {
   subscribe<T>(event: string, callback: (data: T) => void): void;
   publish<T>(event: string, data?: T): void;
+  removeAllListeners: (event: string) => void;
 }
 
 @injectable()
@@ -21,6 +22,10 @@ export class EventService implements IEventService {
 
   publish = <T>(event: string, data?: T): void => {
     this.eventEmmitter.emit(event, data || {});
+  }
+
+  removeAllListeners = (event: string): void => {
+    this.eventEmmitter.removeAllListeners(event);
   }
 
 }
