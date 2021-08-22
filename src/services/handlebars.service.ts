@@ -1,6 +1,6 @@
 import * as _handlebars from 'handlebars';
 import * as _fsx from 'fs-extra';
-import * as _moment from 'moment';
+import * as _moment from 'moment-timezone';
 import { injectable } from 'inversify';
 import { IoC, TYPES } from '../composition/app.composition';
 import { WebsiteConfig, FileData } from '../models';
