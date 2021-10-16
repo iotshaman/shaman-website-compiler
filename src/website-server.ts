@@ -74,7 +74,7 @@ export class WebsiteServer implements IWebsiteServer {
   private isAssetRoute = (path: string) => {
     if (path == 'sitemap.xml') return false;
     let extension = GetFileExtension(path);
-    return ['js', 'css', 'html'].indexOf(extension) == -1;
+    return ['', 'js', 'css', 'html'].indexOf(extension) == -1;
   }
 
 }

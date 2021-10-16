@@ -9,6 +9,7 @@ import { IWebsiteServer } from './website-server';
 import { CompilerDataContext } from './data/compiler.context';
 import { ILogger, LogLevels } from './logger';
 import { IEventService } from './services/event.service';
+import { GetFileExtension } from './functions/file.functions';
 
 export class Website {
 
@@ -48,6 +49,8 @@ export class Website {
     if (!this.config.output) return Promise.resolve(routes);
     let operations = routes.map(route => {
       let path = _path.join(this.config.output, route.path);
+      let extension = GetFileExtension(path);
+      if (extension == '' && route.extension == 'html') path = `${path}.html`;
       return _fsx.ensureFile(path).then(_ => _fsx.outputFile(path, route.content));
     });
     let assets = this.context.models.assets.filter(a => !!a)
