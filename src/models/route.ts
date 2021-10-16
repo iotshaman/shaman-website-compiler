@@ -1,3 +1,4 @@
+import { RemoveFileExtension } from '../functions/file.functions';
 import { FileData } from './file-data';
 
 export class Route {
@@ -7,11 +8,12 @@ export class Route {
   extension: string;
   mimeType: string;
 
-  constructor(path: string, content: string, extension: string) {
+  constructor(path: string, content: string, extension: string, extensionless: boolean = false) {
     this.path = path;
     this.content = content;
     this.extension = extension;
-    this.mimeType = this.getmimeType(extension)
+    this.mimeType = this.getmimeType(extension);
+    if (extensionless) this.path = RemoveFileExtension(path, 'html');
   }
 
   private getmimeType(extension: string): string {

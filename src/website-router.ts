@@ -22,7 +22,7 @@ export class WebsiteRouter implements IWebsiteRouter {
   getAllRoutes = (): Promise<Route[]> => {
     let files = this.context.models.files.filter(file => file.route && !file.model.shaman?.private);
     let bundles = this.context.models.bundles.filter(b => !!b.content);
-    let routes = files.map(f => new Route(f.routePath, f.content, f.extension));
+    let routes = files.map(f => new Route(f.routePath, f.content, f.extension, f.model.shaman?.extensionless));
     routes = routes.concat(bundles.map(b => new Route(b.path, b.content, b.type)));
     routes = routes.concat(this.getDynamicRoutes());
     return this.createSitemap(routes);

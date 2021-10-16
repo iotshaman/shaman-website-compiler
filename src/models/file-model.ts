@@ -12,4 +12,5 @@ export class FileModelConfig {
   query?: QueryModel[];
   bundles?: Bundle[];
   private?: boolean;
+  extensionless?: boolean;
 }

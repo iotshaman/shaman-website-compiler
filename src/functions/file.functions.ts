@@ -12,14 +12,17 @@ export function GetFileExtension(file: string): string {
   return file.substring(index + 1);
 }
 
+export function RemoveFileExtension(file: string, extension: string): string {
+  var index = file.lastIndexOf(`.${extension}`);
+  return file.substring(0, index);
+}
+
 export function GetJsonExtensionFromHtml(file: string): string {
-  var index = file.lastIndexOf('.html');
-  return `${file.substring(0, index)}.json`;
+  return `${RemoveFileExtension(file, 'html')}.json`;
 }
 
 export function ChangeExtension(file: string, pre: string, post: string)  {
-  var index = file.lastIndexOf(`.${pre}`);
-  return `${file.substring(0, index)}.${post}`;
+  return `${RemoveFileExtension(file, pre)}.${post}`;
 }
 
 export function GetFileMimeType(extension: string): string {
