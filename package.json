@@ -21,7 +21,7 @@
     "html-minifier": "^4.0.0",
     "inversify": "^6.0.1",
     "json-repo": "^1.2.4",
-    "moment": "^2.29.1",
+    "moment": "^2.29.2",
     "moment-timezone": "^0.5.34",
     "mongodb": "^3.7.3",
     "reflect-metadata": "^0.1.13",
